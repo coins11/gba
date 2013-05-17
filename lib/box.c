@@ -46,11 +46,9 @@ draw_box (Shape *s)
 	hword *base = (hword *)VRAM;
 	int x, y;
 
-	wait_until_vblank();
 	for (y = 1; y <= b->height; y++) {
 		memset((base + s->p.x + (s->p.y + y) * LCD_WIDTH), s->color, b->width*2);
 	}
-	wait_while_vblank();
 }
 
 void
@@ -67,7 +65,6 @@ update_apex_of_box (Shape *s)
 void
 erase_box (Shape *s)
 {
-	Box *b = &(s->as.box);
 	Shape copy_b;
 
 	copy_b = *s;

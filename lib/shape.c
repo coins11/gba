@@ -20,12 +20,19 @@ int
 touch_c2b (Shape *c, Shape *b)
 {
 	Vector pq, pm, qm;
-	int i, d, cross;
+	int i, cross;
+	double d;
 	int n[][4] = {
 		{0, 1, 3, 2},
 		{1, 3, 2, 0}
 	};
 	int r = c->as.circle.r;
+
+	for (i = 0; i < 4; i++) {
+		if ( b->as.box.apex[i].distance( &(b->as.box.apex[i]), &(c->p) ) <= r * r ) {
+			return 1;
+		}
+	}
 
 	new_Vector(&pq);
 	new_Vector(&pm);
@@ -40,7 +47,7 @@ touch_c2b (Shape *c, Shape *b)
 		d     = (cross * cross) / pq.length2(&pq);
 
 		if (d <= r * r) {
-			if (pm.inner(&pm, &pq) * qm.inner(&qm, &pq) <= 0 || r * r > pm.length2(&pm) || r * r > pq.length2(&pq)) {
+			if (pm.inner(&pm, &pq) * qm.inner(&qm, &pq) <= 0) {
 				return 1;
 			}
 		}
@@ -124,6 +131,7 @@ shape_run_body (Shape *s)
 		d  =  -1;
 		dx *= -1;
 	}
+	dx %= LCD_WIDTH; 
 	for (i = 0; i < dx; i++) {
 		if ( ! s->move(s, d, 0) ) {
 			s->v.reflect_x( &(s->v) );
@@ -144,6 +152,7 @@ shape_run_body (Shape *s)
 		d  =  -1;
 		dy *= -1;
 	}
+	dy %= LCD_HEIGHT;
 	for (i = 0; i < dy; i++) {
 		if ( ! s->move(s, 0, d) ) {
 			s->v.reflect_y( &(s->v) );

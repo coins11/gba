@@ -138,15 +138,12 @@ draw_circle (Shape *s){
 
 	f = draw_point;
 
-	wait_until_vblank();
 	s->as.circle.do_border(s, f);
-	wait_while_vblank();
 }
 
 int
 move_circle (Shape *s, int x, int y)
 {
-	Circle *c    = &(s->as.circle);
 	Shape copy_c = *s;
 
 	copy_c.p.move( &(copy_c.p), x, y );
@@ -162,7 +159,6 @@ move_circle (Shape *s, int x, int y)
 
 void
 erase_circle (Shape *s){
-	Circle *c    = &(s->as.circle);
 	Shape copy_c = *s;
 
 	copy_c.color = COLOR_BLACK;
@@ -173,7 +169,6 @@ int
 circle_in_screen (Shape *s)
 {
 	Circle *c = &(s->as.circle);
-
 	int (*f)(int, int);
 
 	f = in_screen;
@@ -185,7 +180,6 @@ int
 circle_on_area_border (Shape *s)
 {
 	Circle *c = &(s->as.circle);
-
 	int (*f)(int, int);
 
 	f = on_area_border;
