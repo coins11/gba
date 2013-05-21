@@ -16,6 +16,7 @@ new_Box (Shape *s)
 
 	new_Shape(s);
 	new_Point( &(s->p) );
+	new_Point( &(s->pre_p) );
 	new_Velocity( &(s->v) );
 
 	new_Point( &(b->apex[0]) );
@@ -40,6 +41,17 @@ new_Box (Shape *s)
 }
 
 void
+update_apex_of_box (Shape *s)
+{
+	Box *b = &(s->as.box);
+
+	b->apex[0].set( &(b->apex[0]), s->p.x, s->p.y );
+	b->apex[1].set( &(b->apex[1]), s->p.x + b->width, s->p.y );
+	b->apex[2].set( &(b->apex[2]), s->p.x, s->p.y + b->height );
+	b->apex[3].set( &(b->apex[3]), s->p.x + b->width, s->p.y + b->height );
+}
+
+void
 draw_box (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -52,23 +64,12 @@ draw_box (Shape *s)
 }
 
 void
-update_apex_of_box (Shape *s)
-{
-	Box *b = &(s->as.box);
-
-	b->apex[0].set( &(b->apex[0]), s->p.x, s->p.y );
-	b->apex[1].set( &(b->apex[1]), s->p.x + b->width, s->p.y );
-	b->apex[2].set( &(b->apex[2]), s->p.x, s->p.y + b->height );
-	b->apex[3].set( &(b->apex[3]), s->p.x + b->width, s->p.y + b->height );
-}
-
-void
 erase_box (Shape *s)
 {
-	Shape copy_b;
+	Shape copy_b = *s;
 
-	copy_b = *s;
 	copy_b.color = COLOR_BLACK;
+	copy_b.p     = copy_b.pre_p;
 
 	copy_b.draw( &copy_b );
 }

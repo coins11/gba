@@ -25,7 +25,7 @@ typedef struct circle {
 struct shape {
 	struct shape *next;
 
-	Point p;
+	Point p, pre_p;
 	hword color;
 	Velocity v;
 	int type;

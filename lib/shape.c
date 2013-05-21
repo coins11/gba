@@ -9,6 +9,8 @@
 void
 new_Shape (Shape *s)
 {
+	s->pre_p = s->p;
+
 	s->move = move_shape;
 
 	s->run  = shape_run;
@@ -124,6 +126,7 @@ shape_run_body (Shape *s)
 	int i, d, dx, dy;
 
 	s->v.set_v( &(s->v), s->v.dx + s->v.ax, s->v.dy + s->v.ay);
+	s->pre_p.set( &(s->pre_p), s->p.x, s->p.y );
 
 	dx = s->v.dx;
 	d  = 1;
@@ -143,7 +146,6 @@ shape_run_body (Shape *s)
 			d *= -1;
 			s->move(s, d, 0);
 		}
-
 	}
 
 	dy = s->v.dy;

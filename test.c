@@ -11,6 +11,8 @@
 #define COLOR_RED       BGR(31, 31, 31)
 #define COLOR_BLACK     0
 
+const int __gba_multiboot;
+
 int
 main () {
 	hword   *fb = (hword*)VRAM;
@@ -67,58 +69,41 @@ main () {
 	//b.next = &c2;
 	//c2.next = &b2;
 	//b2.next = &c;
-	
+
 	while (1) {
 		key = gba_register(KEY_STATUS);
 
 		wait_until_vblank();
-		c.erase(&c);
-		b.erase(&b);
-		//c2.erase(&c2);
+		c.draw(&c);
+		b.draw(&b);
+		//c2.draw(&c2);
 		wait_while_vblank();
 
 		c.run(&c);
-
+		
 		if (! (key & KEY_DOWN)) {
 			b.move(&b, 0, 4);
+			b.erase(&b);
 		}
 
 		if (! (key & KEY_UP)) {
 			b.move(&b, 0, -4);
+			b.erase(&b);
 		}
 
 		if (! (key & KEY_LEFT)) {
 			b.move(&b, -4, 0);
+			b.erase(&b);
 		}
 
 		if (! (key & KEY_RIGHT)) {
 			b.move(&b, 4, 0);
+			b.erase(&b);
 		}
 
 		wait_until_vblank();
-		c.draw(&c);
-		b.draw(&b);
-		//c2.draw(&c2);
-		wait_while_vblank();
-	}
-
-	/*
-	while (1) {
-		wait_until_vblank();
 		c.erase(&c);
-		b.erase(&b);
 		//c2.erase(&c2);
-		//b2.erase(&b2);
-		wait_while_vblank();
-
-		c.run(&c);
-
-		wait_until_vblank();
-		c.draw(&c);
-		b.draw(&b);
-		//c2.draw(&c2);
-		//b2.draw(&b2);
 		wait_while_vblank();
 	}
-	*/
 }

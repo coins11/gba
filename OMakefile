@@ -4,13 +4,16 @@
 	arm-none-eabi-gcc -O3 -c $<
 
 crt.o : crt.S
-	arm-none-eabi-gcc -c $<
+	arm-none-eabi-gcc -O3 -c $<
 
 %.bin : %.c crt.o point.o box.o circle.o delay.o screen.o velocity.o shape.o vector.o
 	arm-none-eabi-gcc -O3 -c $<
 	arm-none-eabi-ld -o $*.out -T gcc.ls crt.o point.o vector.o screen.o velocity.o box.o circle.o shape.o delay.o $*.o /Volumes/MacStorage/home/yoshimura_yuu/bin/arm-cs-tools/lib/gcc/arm-none-eabi/4.6.3/libgcc.a /Volumes/MacStorage/home/yoshimura_yuu/bin/arm-cs-tools/arm-none-eabi/lib/libc.a
 	arm-none-eabi-objcopy -O binary $*.out $*.bin
 
+%.mb : %.bin
+	mv $< $*.mb
+
 clean : 
-	rm *.bin *.o *.out
+	rm *.bin *.o *.out *.mb
 

@@ -16,6 +16,7 @@ new_Circle (Shape *s)
 
 	new_Shape(s);
 	new_Point( &(s->p) );
+	new_Point( &(s->pre_p) );
 	new_Velocity( &(s->v) );
 
 	s->type = 1;
@@ -141,27 +142,13 @@ draw_circle (Shape *s){
 	s->as.circle.do_border(s, f);
 }
 
-int
-move_circle (Shape *s, int x, int y)
-{
-	Shape copy_c = *s;
-
-	copy_c.p.move( &(copy_c.p), x, y );
-
-	if ( copy_c.in_screen(&copy_c) ) {
-		s->p.move( &(s->p), x, y );
-
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
 void
 erase_circle (Shape *s){
 	Shape copy_c = *s;
 
 	copy_c.color = COLOR_BLACK;
+	copy_c.p     = copy_c.pre_p;
+
 	copy_c.draw(&copy_c);
 }
 
