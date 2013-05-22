@@ -1,4 +1,5 @@
 #include "gba.h"
+#include "libgba/gba_systemcalls.h"
 #include "point.h"
 #include "vector.h"
 #include "velocity.h"
@@ -22,8 +23,7 @@ int
 touch_c2b (Shape *c, Shape *b)
 {
 	Vector pq, pm, qm;
-	int i, cross;
-	double d;
+	int i, cross, d;
 	int n[][4] = {
 		{0, 1, 3, 2},
 		{1, 3, 2, 0}
@@ -46,7 +46,7 @@ touch_c2b (Shape *c, Shape *b)
 		qm.set( &qm, &(b->as.box.apex[n[1][i]]), &(c->p) );
 
 		cross = pm.outer(&pm, &pq);
-		d     = (cross * cross) / pq.length2(&pq);
+		d     = Div( (cross * cross), pq.length2(&pq) );
 
 		if (d <= r * r) {
 			if (pm.inner(&pm, &pq) * qm.inner(&qm, &pq) <= 0) {
@@ -134,7 +134,7 @@ shape_run_body (Shape *s)
 		d  =  -1;
 		dx *= -1;
 	}
-	dx %= LCD_WIDTH; 
+	dx = DivMod(dx, LCD_WIDTH);
 	for (i = 0; i < dx; i++) {
 		if ( ! s->move(s, d, 0) ) {
 			s->v.reflect_x( &(s->v) );
@@ -154,7 +154,7 @@ shape_run_body (Shape *s)
 		d  =  -1;
 		dy *= -1;
 	}
-	dy %= LCD_HEIGHT;
+	dy = DivMod(dy, LCD_HEIGHT);
 	for (i = 0; i < dy; i++) {
 		if ( ! s->move(s, 0, d) ) {
 			s->v.reflect_y( &(s->v) );
