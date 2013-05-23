@@ -15,7 +15,7 @@
 
 int
 main () {
-	hword   *fb = (hword*)VRAM;
+	hword *fb = (hword*)VRAM;
 	Shape b;
 	Shape c[4];
 	int i, key;
@@ -64,6 +64,7 @@ main () {
 	new_Box(&b);
 	b.v.set_v(&(b.v), 0, 0);
 	b.v.set_a(&(b.v), 0, 0);
+	b.v.reflectable = 0;
 
 	c[0].next = &c[1];
 	c[1].next = &c[2];
@@ -86,42 +87,34 @@ main () {
 		c[0].run(&c[0]);
 		
 		if (! (key & KEY_DOWN)) {
-			b.move(&b, 0, 4);
-
-			wait_while_vblank();
-			b.erase(&b);
-			wait_while_vblank();
+			b.v.set_a(&(b.v), b.v.ax, b.v.ax + 3);
 		}
-
-		if (! (key & KEY_UP)) {
-			b.move(&b, 0, -4);
-
-			wait_while_vblank();
-			b.erase(&b);
+		else if (! (key & KEY_UP)) {
+			b.v.set_a(&(b.v), b.v.ax, b.v.ax - 3);
+		}
+		else {
+			b.v.set_a(&(b.v), b.v.ax, 0);
+			b.v.set_v(&(b.v), b.v.dx, 0);
 		}
 
 		if (! (key & KEY_LEFT)) {
-			b.move(&b, -4, 0);
-
-			wait_while_vblank();
-			b.erase(&b);
-			wait_while_vblank();
+			b.v.set_a(&(b.v), b.v.ax - 3, b.v.ay);
 		}
-
-		if (! (key & KEY_RIGHT)) {
-			b.move(&b, 4, 0);
-
-			wait_while_vblank();
-			b.erase(&b);
-			wait_while_vblank();
+		else if (! (key & KEY_RIGHT)) {
+			b.v.set_a(&(b.v), b.v.ax + 3, b.v.ay);
 		}
-
+		else {
+			b.v.set_a(&(b.v), 0, b.v.ay);
+			b.v.set_v(&(b.v), 0, b.v.dy);
+		}
+	
 		wait_until_vblank();
 
 		for (i = 0; i < 4; i++) {
 			c[i].erase(&c[i]);
 		}
 
+		b.erase(&b);
 		wait_while_vblank();
 	}
 }

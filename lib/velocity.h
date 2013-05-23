@@ -7,6 +7,8 @@ typedef struct velocity {
 	int ax;
 	int ay;
 
+	int reflectable;
+
 	void (*set_v)(struct velocity *, int, int);
 	void (*set_a)(struct velocity *, int, int);
 

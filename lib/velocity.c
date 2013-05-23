@@ -10,6 +10,8 @@ new_Velocity (Velocity *v)
 	v->ax = 0;
 	v->ay = 0;
 
+	v->reflectable = 1;
+
 	v->set_v  = set_velocity;
 	v->set_a  = set_accelerate;
 
@@ -33,12 +35,16 @@ set_accelerate (Velocity *v, int x, int y) {
 void
 velocity_reflect_x (Velocity *v)
 {
-	v->set_v(v, -(v->dx), v->dy );
+	if (v->reflectable) {
+		v->set_v(v, -(v->dx), v->dy );
+	}
 }
 
 void
 velocity_reflect_y (Velocity *v)
 {
-	v->set_v(v, v->dx, -(v->dy) );
+	if (v->reflectable) {
+		v->set_v(v, v->dx, -(v->dy) );
+	}
 }
 

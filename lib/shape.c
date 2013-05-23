@@ -102,9 +102,8 @@ touch_shapes (Shape *s)
 int
 move_shape (Shape *s, int x, int y)
 {
-	Shape copy;
+	Shape copy = *s;
 
-	copy = *s;
 	copy.p.set( &(copy.p), copy.p.x + x, copy.p.y + y );
 	
 	if ( copy.in_screen(&copy) ) {
@@ -134,16 +133,15 @@ shape_run_body (Shape *s)
 		d  =  -1;
 		dx *= -1;
 	}
-	dx = DivMod(dx, LCD_WIDTH);
 	for (i = 0; i < dx; i++) {
 		if ( ! s->move(s, d, 0) ) {
 			s->v.reflect_x( &(s->v) );
-			d *= -1;
+			d *= -1 * s->v.reflectable;
 			s->move(s, d, 0);
 		}
 		else if ( s->touch(s) ) {
 			s->v.reflect_x( &(s->v) );
-			d *= -1;
+			d *= -1 * s->v.reflectable;
 			s->move(s, d, 0);
 		}
 	}
@@ -154,16 +152,15 @@ shape_run_body (Shape *s)
 		d  =  -1;
 		dy *= -1;
 	}
-	dy = DivMod(dy, LCD_HEIGHT);
 	for (i = 0; i < dy; i++) {
 		if ( ! s->move(s, 0, d) ) {
 			s->v.reflect_y( &(s->v) );
-			d *= -1;
+			d *= -1 * s->v.reflectable;
 			s->move(s, 0, d);
 		}
 		else if ( s->touch(s) ) {
 			s->v.reflect_y( &(s->v) );
-			d *= -1;
+			d *= -1 * s->v.reflectable;
 			s->move(s, 0, d);
 		}
 	}
