@@ -83,8 +83,6 @@ main () {
 
 		b.draw(&b);
 		wait_while_vblank();
-
-		c[0].run(&c[0]);
 		
 		if (! (key & KEY_DOWN)) {
 			b.v.set_a(&(b.v), b.v.ax, b.v.ax + 3);
@@ -107,6 +105,8 @@ main () {
 			b.v.set_a(&(b.v), 0, b.v.ay);
 			b.v.set_v(&(b.v), 0, b.v.dy);
 		}
+
+		c[0].run(&c[0]);
 	
 		wait_until_vblank();
 
