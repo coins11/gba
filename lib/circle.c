@@ -9,7 +9,7 @@
 #define COLOR_BLACK     0
 
 
-void
+inline void
 new_Circle (Shape *s)
 {
 	Circle *c = &(s->as.circle);
@@ -32,7 +32,7 @@ new_Circle (Shape *s)
 	s->on_area_border = circle_on_area_border;
 }
 
-int
+inline int
 all_on_circle ( int (*f)(int, int), Shape *c, int x, int y )
 {
 	return (*f)(y + c->p.x, x + c->p.y) &&
@@ -45,7 +45,7 @@ all_on_circle ( int (*f)(int, int), Shape *c, int x, int y )
 		(*f)(y + c->p.x, -x + c->p.y); 
 }
 
-int
+inline int
 some_on_circle ( int (*f)(int, int), Shape *c, int x, int y )
 {
 	return (*f)(y + c->p.x, x + c->p.y) ||
@@ -58,7 +58,7 @@ some_on_circle ( int (*f)(int, int), Shape *c, int x, int y )
 		(*f)(y + c->p.x, -x + c->p.y); 
 }
 
-void
+inline void
 do_on_circle ( void (*f)(int, int, hword), Shape *c, int x, int y) 
 {
 	(*f)(y + c->p.x, x + c->p.y, c->color);
@@ -115,25 +115,25 @@ circle_border ( Shape *s, int mode, void (*f)(void) )
 	return flag;
 }
 
-int
+inline int
 all_circle_border ( Shape *c, int (*f)(int, int) )
 {
 	return circle_border( c, 1, (void (*)(void))f );
 }
 
-int
+inline int
 some_circle_border ( Shape *c, int (*f)(int, int) )
 {
 	return circle_border( c, 2, (void (*)(void))f );
 }
 
-void
+inline void
 do_circle_border ( Shape *c, void (*f)(int, int, hword) )
 {
 	circle_border( c, 0, (void (*)(void))f );
 }
 
-void
+inline void
 draw_circle (Shape *s){
 	void (*f)(int, int, hword);
 
@@ -142,7 +142,7 @@ draw_circle (Shape *s){
 	s->as.circle.do_border(s, f);
 }
 
-void
+inline void
 erase_circle (Shape *s){
 	Shape copy_c = *s;
 
@@ -152,7 +152,7 @@ erase_circle (Shape *s){
 	copy_c.draw(&copy_c);
 }
 
-int
+inline int
 circle_in_screen (Shape *s)
 {
 	Circle *c = &(s->as.circle);
@@ -163,7 +163,7 @@ circle_in_screen (Shape *s)
 	return c->all_border(s, f);
 }
 
-int
+inline int
 circle_on_area_border (Shape *s)
 {
 	Circle *c = &(s->as.circle);

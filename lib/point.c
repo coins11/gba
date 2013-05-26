@@ -2,7 +2,7 @@
 #include "screen.h"
 #include "point.h"
 
-void
+inline void
 new_Point (Point *p)
 {
 	p->move = move_point;
@@ -13,19 +13,19 @@ new_Point (Point *p)
 	p->set = set_point;
 }
 
-int
+inline int
 point_distance (Point *p1, Point *p2)
 {
 	return (p2->x - p1->x) * (p2->x - p1->x) + (p2->y - p1->y) * (p2->y - p1->y);
 }
 
-void
+inline void
 point_draw_point (Point *p, hword c)
 {
 	draw_point(p->x, p->y, c);
 }
 
-void
+inline void
 draw_point (int x, int y, hword c)
 {
 	hword *base;
@@ -34,7 +34,7 @@ draw_point (int x, int y, hword c)
 	*(base + x + LCD_WIDTH * y) = c;
 }
 
-void
+inline void
 int_draw_line(int x1, int x2, int y, hword c)
 {
 	hword *base;
@@ -47,7 +47,7 @@ int_draw_line(int x1, int x2, int y, hword c)
 	}
 }
 
-int
+inline int
 move_point (Point *p, int x, int y)
 {
 	if ( in_screen( p->x + x, p->y + y ) ) {
@@ -60,7 +60,7 @@ move_point (Point *p, int x, int y)
 	}
 }
 
-void
+inline void
 set_point (Point *p, int x, int y)
 {
 	p->x = x;

@@ -15,9 +15,9 @@ typedef struct vector {
 
 extern void new_Vector(Vector *);
 
-extern void set_vector(Vector *, Point *, Point *);
+extern inline void set_vector(Vector *, Point *, Point *);
 
-extern int vector_length2(Vector *);
-extern int inner_product(Vector *, Vector *);
-extern int outer_product(Vector *, Vector *);
+extern inline int vector_length2(Vector *);
+extern inline int inner_product(Vector *, Vector *);
+extern inline int outer_product(Vector *, Vector *);
 #endif

@@ -16,12 +16,12 @@ typedef struct velocity {
 	void (*reflect_y)(struct velocity *);
 } Velocity;
 
-void new_Velocity (Velocity *);
+void inline new_Velocity (Velocity *);
 
-void set_velocity (Velocity *, int, int);
-void set_accelerate (Velocity *, int, int);
+void inline set_velocity (Velocity *, int, int);
+void inline set_accelerate (Velocity *, int, int);
 
-void velocity_reflect_x (Velocity *);
-void velocity_reflect_y (Velocity *);
+void inline velocity_reflect_x (Velocity *);
+void inline velocity_reflect_y (Velocity *);
 
 #endif

@@ -4,7 +4,6 @@
 typedef struct shape Shape;
 
 typedef struct box {
-	//int type;
 	int width;
 	int height;
 
@@ -14,7 +13,6 @@ typedef struct box {
 } Box;
 
 typedef struct circle {
-	//int type;
 	int r;
 
 	int  (*all_border) (Shape *, int (*)(int, int));
@@ -47,7 +45,7 @@ struct shape {
 	int (*touch)(struct shape *);
 };
 
-extern void new_Shape (Shape *);
+extern inline void new_Shape (Shape *);
 
 extern int move_shape (Shape *, int, int);
 

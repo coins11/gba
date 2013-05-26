@@ -9,7 +9,7 @@
 
 #define COLOR_BLACK     0
 
-void
+inline void
 new_Box (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -40,7 +40,7 @@ new_Box (Shape *s)
 	s->on_area_border = box_on_area_border;
 }
 
-void
+inline void
 update_apex_of_box (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -51,7 +51,7 @@ update_apex_of_box (Shape *s)
 	b->apex[3].set( &(b->apex[3]), s->p.x + b->width, s->p.y + b->height );
 }
 
-void
+inline void
 draw_box (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -63,7 +63,7 @@ draw_box (Shape *s)
 	}
 }
 
-void
+inline void
 erase_box (Shape *s)
 {
 	Shape copy_b = *s;
@@ -74,7 +74,7 @@ erase_box (Shape *s)
 	copy_b.draw( &copy_b );
 }
 
-int
+inline int
 box_in_screen (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -82,7 +82,7 @@ box_in_screen (Shape *s)
 	return in_screen(s->p.x, s->p.y) && in_screen(s->p.x + b->width, s->p.y + b->height);
 }
 
-int
+inline int
 box_on_area_border (Shape *s)
 {
 	Box *b = &(s->as.box);

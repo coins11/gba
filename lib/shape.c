@@ -7,7 +7,7 @@
 #include "circle.h"
 #include "box.h"
 
-void
+inline void
 new_Shape (Shape *s)
 {
 	s->pre_p = s->p;

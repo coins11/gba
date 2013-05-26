@@ -2,7 +2,7 @@
 #include "point.h"
 #include "velocity.h"
 
-void
+inline void
 new_Velocity (Velocity *v)
 {
 	v->dx = 0;
@@ -19,20 +19,20 @@ new_Velocity (Velocity *v)
 	v->reflect_y = velocity_reflect_y;
 }
 
-void
+inline void
 set_velocity (Velocity *v, int x, int y)
 {
 	v->dx = x;
 	v->dy = y;
 }
 
-void
+inline void
 set_accelerate (Velocity *v, int x, int y) {
 	v->ax = x;
 	v->ay = y;
 }
 
-void
+inline void
 velocity_reflect_x (Velocity *v)
 {
 	if (v->reflectable) {
@@ -40,7 +40,7 @@ velocity_reflect_x (Velocity *v)
 	}
 }
 
-void
+inline void
 velocity_reflect_y (Velocity *v)
 {
 	if (v->reflectable) {

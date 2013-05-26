@@ -2,12 +2,12 @@
 #include "point.h"
 #include "screen.h"
 
-int
+inline int
 touch (Point *p1, Point *p2, int r) {
 	return p1->distance(p1, p2) < r;
 }
 
-int
+inline int
 int_touch (int x0, int y0, int x1, int y1, int r)
 {
 	Point p1, p2;
@@ -20,25 +20,25 @@ int_touch (int x0, int y0, int x1, int y1, int r)
 	return touch(&p1, &p2, r);
 }
 
-int
+inline int
 in_screen (int x, int y)
 {
 	return x >= 0 && x <= LCD_WIDTH && y >= 0 && y <= LCD_HEIGHT;
 }
 
-int
+inline int
 on_side_area_border (int x)
 {
 	return x <= 0 || x >= LCD_WIDTH;
 }
 
-int
+inline int
 on_updown_area_border (int y)
 {
 	return y <= 0 || y >= LCD_HEIGHT;
 }
 
-int
+inline int
 on_area_border (int x, int y)
 {
 	return on_side_area_border(x) || on_updown_area_border(y);
