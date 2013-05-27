@@ -25,25 +25,25 @@ main () {
 
 	new_Circle(&c[0]);
 	c[0].color = COLOR_WHITE;
-	c[0].as.circle.set( &(c[0]), 50, 50, 8 );
+	c[0].as.circle.set( &c[0], 50, 50, 8 );
 	c[0].v.set_v(&(c[0].v), 5, 5);
 	c[0].v.set_a(&(c[0].v), 0, 1);
 
 	new_Circle(&c[1]);
 	c[1].color = COLOR_RED;
-	c[1].as.circle.set( &(c[1]), 120, 120, 8 );
+	c[1].as.circle.set( &c[1], 120, 120, 8 );
 	c[1].v.set_v(&(c[1].v), 1, 1);
 	c[1].v.set_a(&(c[1].v), -1, -1);
 
 	new_Circle(&c[2]);
 	c[2].color = COLOR_BLUE;
-	c[2].as.circle.set( &(c[2]), 80, 80, 10 );
+	c[2].as.circle.set( &c[2], 80, 80, 10 );
 	c[2].v.set_v(&(c[2].v), 3, 2);
 	c[2].v.set_a(&(c[2].v), 0, -2);
 
 	new_Circle(&c[3]);
 	c[3].color = COLOR_GREEN;
-	c[3].as.circle.set( &(c[3]), 150, 130, 12 );
+	c[3].as.circle.set( &c[3], 150, 130, 12 );
 	c[3].v.set_v(&(c[3].v), 9, 9);
 	c[3].v.set_a(&(c[3].v), 0, 2);
 
