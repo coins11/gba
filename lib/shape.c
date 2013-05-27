@@ -1,5 +1,6 @@
 #include "gba.h"
 #include "libgba/gba_systemcalls.h"
+#include <stdarg.h>
 #include "point.h"
 #include "vector.h"
 #include "velocity.h"
@@ -7,16 +8,45 @@
 #include "circle.h"
 #include "box.h"
 
+#define COLOR_BLACK     0
+
 inline void
 new_Shape (Shape *s)
 {
 	s->pre_p = s->p;
 
-	s->move = move_shape;
+	s->move  = move_shape;
+	s->erase = erase_shape;
 
-	s->run  = shape_run;
+	s->run   = shape_run;
 
 	s->touch = touch_shapes;
+}
+
+void
+chain_shapes (int n, ...)
+{
+	int i;
+	Shape *s, *n1, *n2;
+	va_list shapes;
+
+	va_start(shapes, n);
+
+	s  = va_arg(shapes, Shape *);
+	n1 = va_arg(shapes, Shape *);
+
+	s->next = n1;
+
+	for (i = 2; i < n; i++) {
+		n2 = va_arg(shapes, Shape *);
+		n1->next = n2;
+
+		n1 = n2;
+	}
+
+	n2->next = s;
+
+	va_end(shapes);
 }
 
 int
@@ -102,21 +132,35 @@ touch_shapes (Shape *s)
 int
 move_shape (Shape *s, int x, int y)
 {
-	Shape copy = *s;
-
-	copy.p.set( &(copy.p), copy.p.x + x, copy.p.y + y );
+	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
 	
-	if ( copy.in_screen(&copy) ) {
-		s->p.set( &(s->p), s->p.x + x, s->p.y + y );
-
+	if ( s->in_screen(s) ) {
 		if (s->type == 2) {
 			s->as.box.update_apex(s);
 		}
 
 		return 1;
 	} else {
+		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+
 		return 0;
 	}
+}
+
+inline void
+erase_shape (Shape *s){
+	hword c = s->color;
+	int   x = s->p.x,
+		  y = s->p.y;
+	
+	s->color = COLOR_BLACK;
+	s->p     = s->pre_p;
+
+	s->draw(s);
+
+	s->color = c;
+	s->p.x   = x;
+	s->p.y   = y;
 }
 
 void

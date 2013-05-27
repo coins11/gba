@@ -6,9 +6,6 @@
 #include "delay.h"
 #include "circle.h"
 
-#define COLOR_BLACK     0
-
-
 inline void
 new_Circle (Shape *s)
 {
@@ -21,8 +18,9 @@ new_Circle (Shape *s)
 
 	s->type = 1;
 
+	c->set = set_data_of_circle;
+
 	s->draw  = draw_circle;
-	s->erase = erase_circle;
 
 	c->all_border  = all_circle_border;
 	c->some_border = some_circle_border;
@@ -30,6 +28,15 @@ new_Circle (Shape *s)
 
 	s->in_screen      = circle_in_screen;
 	s->on_area_border = circle_on_area_border;
+}
+
+inline void
+set_data_of_circle (Shape *s, int x, int y, int r)
+{
+	Circle *c = &(s->as.circle);
+
+	s->p.set( &(s->p), x, y);
+	c->r = r;
 }
 
 inline int
@@ -142,35 +149,21 @@ draw_circle (Shape *s){
 	s->as.circle.do_border(s, f);
 }
 
-inline void
-erase_circle (Shape *s){
-	Shape copy_c = *s;
-
-	copy_c.color = COLOR_BLACK;
-	copy_c.p     = copy_c.pre_p;
-
-	copy_c.draw(&copy_c);
-}
-
 inline int
 circle_in_screen (Shape *s)
 {
 	Circle *c = &(s->as.circle);
-	int (*f)(int, int);
 
-	f = in_screen;
-
-	return c->all_border(s, f);
+	return in_screen(s->p.x + c->r, s->p.y + c->r) &&
+		   in_screen(s->p.x - c->r, s->p.y - c->r);
 }
 
 inline int
 circle_on_area_border (Shape *s)
 {
 	Circle *c = &(s->as.circle);
-	int (*f)(int, int);
 
-	f = on_area_border;
-
-	return c->some_border(s, f);
+	return on_area_border(s->p.x + c->r, s->p.y + c->r) ||
+		   on_area_border(s->p.x - c->r, s->p.y - c->r);
 }
 

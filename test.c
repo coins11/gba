@@ -21,62 +21,43 @@ main () {
 	int i, key;
 
 	gba_register(LCD_CTRL) = LCD_BG2EN | LCD_MODE3;
-	gba_register(TMR_COUNT0) = 0;
-	gba_register(TMR_CTRL0) = TMR_ENABLE + TMR_1024CLOCK;
+	delay_init();
 
-	c[0].p.x = 50;
-	c[0].p.y = 50;
-	c[0].color = COLOR_WHITE;
-	c[0].as.circle.r = 8;
 	new_Circle(&c[0]);
+	c[0].color = COLOR_WHITE;
+	c[0].as.circle.set( &(c[0]), 50, 50, 8 );
 	c[0].v.set_v(&(c[0].v), 5, 5);
 	c[0].v.set_a(&(c[0].v), 0, 1);
 
-	c[1].p.x = 120;
-	c[1].p.y = 120;
-	c[1].color = COLOR_RED;
-	c[1].as.circle.r = 8;
 	new_Circle(&c[1]);
+	c[1].color = COLOR_RED;
+	c[1].as.circle.set( &(c[1]), 120, 120, 8 );
 	c[1].v.set_v(&(c[1].v), 1, 1);
 	c[1].v.set_a(&(c[1].v), -1, -1);
 
-	c[2].p.x = 80;
-	c[2].p.y = 80;
-	c[2].color = COLOR_BLUE;
-	c[2].as.circle.r = 10;
 	new_Circle(&c[2]);
+	c[2].color = COLOR_BLUE;
+	c[2].as.circle.set( &(c[2]), 80, 80, 10 );
 	c[2].v.set_v(&(c[2].v), 3, 2);
 	c[2].v.set_a(&(c[2].v), 0, -2);
 
-	c[3].p.x = 150;
-	c[3].p.y = 130;
-	c[3].color = COLOR_GREEN;
-	c[3].as.circle.r = 12;
 	new_Circle(&c[3]);
+	c[3].color = COLOR_GREEN;
+	c[3].as.circle.set( &(c[3]), 150, 130, 12 );
 	c[3].v.set_v(&(c[3].v), 9, 9);
 	c[3].v.set_a(&(c[3].v), 0, 2);
 
-	b.p.x = 100;
-	b.p.y = 100;
-	b.color = COLOR_WHITE;
-	b.as.box.width  = 50;
-	b.as.box.height = 5;
 	new_Box(&b);
+	b.color = COLOR_WHITE;
+	b.as.box.set(&b, 100, 100, 50, 5);
 	b.v.set_v(&(b.v), 0, 0);
 	b.v.set_a(&(b.v), 0, 0);
 	b.v.reflectable = 0;
 
-	c[0].next = &c[1];
-	c[1].next = &c[2];
-	c[2].next = &c[3];
-	c[3].next = &b;
-	b.next    = &c[0];
+	chain_shapes(5, &c[0], &c[1], &c[2], &c[3], &b);
 	
+	wait_until_vblank();
 	while (1) {
-		key = gba_register(KEY_STATUS);
-
-		wait_until_vblank();
-
 		for (i = 0; i < 4; i++) {
 			c[i].draw(&c[i]);
 		}
@@ -84,11 +65,13 @@ main () {
 		b.draw(&b);
 		wait_while_vblank();
 		
+		key = gba_register(KEY_STATUS);
+
 		if (! (key & KEY_DOWN)) {
-			b.v.set_a(&(b.v), b.v.ax, b.v.ax + 3);
+			b.v.set_a(&(b.v), b.v.ax, b.v.ax + 2);
 		}
 		else if (! (key & KEY_UP)) {
-			b.v.set_a(&(b.v), b.v.ax, b.v.ax - 3);
+			b.v.set_a(&(b.v), b.v.ax, b.v.ax - 2);
 		}
 		else {
 			b.v.set_a(&(b.v), b.v.ax, 0);
@@ -96,10 +79,10 @@ main () {
 		}
 
 		if (! (key & KEY_LEFT)) {
-			b.v.set_a(&(b.v), b.v.ax - 3, b.v.ay);
+			b.v.set_a(&(b.v), b.v.ax - 2, b.v.ay);
 		}
 		else if (! (key & KEY_RIGHT)) {
-			b.v.set_a(&(b.v), b.v.ax + 3, b.v.ay);
+			b.v.set_a(&(b.v), b.v.ax + 2, b.v.ay);
 		}
 		else {
 			b.v.set_a(&(b.v), 0, b.v.ay);
@@ -107,6 +90,8 @@ main () {
 		}
 
 		c[0].run(&c[0]);
+
+		delay(700);
 	
 		wait_until_vblank();
 
@@ -115,6 +100,5 @@ main () {
 		}
 
 		b.erase(&b);
-		wait_while_vblank();
 	}
 }
