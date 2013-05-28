@@ -11,13 +11,14 @@
 #define COLOR_BLUE      BGR(0, 0, 31)
 #define COLOR_RED       BGR(31, 0, 0)
 #define COLOR_GREEN     BGR(0, 31, 0)
+#define COLOR_VIOLET    BGR(31, 10, 31)
 #define COLOR_BLACK     0
 
 int
 main () {
 	hword *fb = (hword*)VRAM;
-	Shape b;
 	Shape c[4];
+	Shape b[2];
 	int i, key;
 
 	gba_register(LCD_CTRL) = LCD_BG2EN | LCD_MODE3;
@@ -47,46 +48,49 @@ main () {
 	c[3].v.set_v(&(c[3].v), 9, 9);
 	c[3].v.set_a(&(c[3].v), 0, 2);
 
-	new_Box(&b);
-	b.color = COLOR_WHITE;
-	b.as.box.set(&b, 100, 100, 50, 5);
-	b.v.set_v(&(b.v), 0, 0);
-	b.v.set_a(&(b.v), 0, 0);
-	b.v.reflectable = 0;
+	new_Box(&b[0]);
+	b[0].color = COLOR_VIOLET;
+	b[0].as.box.set(&b[0], 30, 100, 10, 10);
+	b[0].v.set_v(&(b[0].v), 4, 4);
+	b[0].v.set_a(&(b[0].v), 0, 0);
 
-	chain_shapes(5, &c[0], &c[1], &c[2], &c[3], &b);
+	new_Box(&b[1]);
+	b[1].color = COLOR_WHITE;
+	b[1].as.box.set(&b[1], 100, 100, 50, 5);
+	b[1].v.set_v(&(b[1].v), 0, 0);
+	b[1].v.set_a(&(b[1].v), 0, 0);
+	b[1].v.reflectable = 0;
+
+	chain_shapes(6, &c[0], &c[1], &c[2], &c[3], &b[0], &b[1]);
 	
 	wait_until_vblank();
 	while (1) {
-		for (i = 0; i < 4; i++) {
-			c[i].draw(&c[i]);
-		}
+		c[0].draw_all(&c[0]);
 
-		b.draw(&b);
 		wait_while_vblank();
 		
 		key = gba_register(KEY_STATUS);
 
 		if (! (key & KEY_DOWN)) {
-			b.v.set_a(&(b.v), b.v.ax, b.v.ax + 2);
+			b[1].v.set_a(&(b[1].v), b[1].v.ax, b[1].v.ax + 2);
 		}
 		else if (! (key & KEY_UP)) {
-			b.v.set_a(&(b.v), b.v.ax, b.v.ax - 2);
+			b[1].v.set_a(&(b[1].v), b[1].v.ax, b[1].v.ax - 2);
 		}
 		else {
-			b.v.set_a(&(b.v), b.v.ax, 0);
-			b.v.set_v(&(b.v), b.v.dx, 0);
+			b[1].v.set_a(&(b[1].v), b[1].v.ax, 0);
+			b[1].v.set_v(&(b[1].v), b[1].v.dx, 0);
 		}
 
 		if (! (key & KEY_LEFT)) {
-			b.v.set_a(&(b.v), b.v.ax - 2, b.v.ay);
+			b[1].v.set_a(&(b[1].v), b[1].v.ax - 2, b[1].v.ay);
 		}
 		else if (! (key & KEY_RIGHT)) {
-			b.v.set_a(&(b.v), b.v.ax + 2, b.v.ay);
+			b[1].v.set_a(&(b[1].v), b[1].v.ax + 2, b[1].v.ay);
 		}
 		else {
-			b.v.set_a(&(b.v), 0, b.v.ay);
-			b.v.set_v(&(b.v), 0, b.v.dy);
+			b[1].v.set_a(&(b[1].v), 0, b[1].v.ay);
+			b[1].v.set_v(&(b[1].v), 0, b[1].v.dy);
 		}
 
 		c[0].run(&c[0]);
@@ -94,11 +98,6 @@ main () {
 		delay(700);
 	
 		wait_until_vblank();
-
-		for (i = 0; i < 4; i++) {
-			c[i].erase(&c[i]);
-		}
-
-		b.erase(&b);
+		c[0].erase_all(&c[0]);
 	}
 }

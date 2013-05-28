@@ -18,6 +18,9 @@ new_Shape (Shape *s)
 	s->move  = move_shape;
 	s->erase = erase_shape;
 
+	s->draw_all  = draw_all_shapes;
+	s->erase_all = erase_all_shapes;
+
 	s->run   = shape_run;
 
 	s->touch = touch_shapes;
@@ -162,6 +165,31 @@ erase_shape (Shape *s){
 	s->p.x   = x;
 	s->p.y   = y;
 }
+
+inline void
+draw_all_shapes (Shape *s)
+{
+	Shape *n = s->next;
+
+	s->draw(s);
+	while (s != n && n != NULL) {
+		n->draw(n);
+		n = n->next;
+	}
+}
+
+inline void
+erase_all_shapes (Shape *s)
+{
+	Shape *n = s->next;
+
+	s->erase(s);
+	while (s != n && n != NULL) {
+		n->erase(n);
+		n = n->next;
+	}
+}
+
 
 void
 shape_run_body (Shape *s)
