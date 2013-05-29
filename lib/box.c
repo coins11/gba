@@ -24,16 +24,10 @@ new_Box (Shape *s)
 
 	s->type = 2;
 
-	//b->apex[0].set( &(b->apex[0]), s->p.x, s->p.y );
-	//b->apex[1].set( &(b->apex[1]), s->p.x + b->width, s->p.y );
-	//b->apex[2].set( &(b->apex[2]), s->p.x, s->p.y + b->height );
-	//b->apex[3].set( &(b->apex[3]), s->p.x + b->width, s->p.y + b->height );
-
-	b->set = set_data_of_box;
+	b->set         = set_data_of_box;
+	b->update_apex = update_apex_of_box;
 
 	s->draw  = draw_box;
-
-	b->update_apex = update_apex_of_box;
 
 	s->in_screen      = box_in_screen;
 	s->on_area_border = box_on_area_border;

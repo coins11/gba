@@ -26,11 +26,13 @@ typedef struct circle {
 
 struct shape {
 	struct shape *next;
+	struct shape *prev;
 
 	Point p, pre_p;
 	hword color;
 	Velocity v;
 	int type;
+	int breakable;
 
 	union {
 		Circle circle;
@@ -40,9 +42,11 @@ struct shape {
 	void (*draw) (struct shape *);
 	int  (*move) (struct shape *, int, int);
 	void (*erase) (struct shape *);
+	void (*redraw) (struct shape *);
 
 	void (*draw_all) (struct shape *);
 	void (*erase_all) (struct shape *);
+	void (*redraw_all) (struct shape *);
 
 	int (*in_screen) (struct shape *);
 	int (*on_area_border) (struct shape *);
@@ -58,10 +62,13 @@ extern void chain_shapes (int, ...);
 
 extern int  move_shape (Shape *, int, int);
 extern inline void erase_shape (Shape *);
+extern inline void redraw_shape (Shape *);
 
 extern inline void draw_all_shapes (Shape *);
 extern inline void erase_all_shapes (Shape *);
+extern inline void redraw_all_shapes (Shape *);
 
 extern void shape_run (Shape *);
+extern inline void break_shape (Shape *);
 extern int touch_shapes (Shape *);
 #endif

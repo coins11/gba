@@ -35,24 +35,28 @@ main () {
 	c[1].as.circle.set( &c[1], 120, 120, 8 );
 	c[1].v.set_v(&(c[1].v), 1, 1);
 	c[1].v.set_a(&(c[1].v), -1, -1);
+	c[1].breakable = 1;
 
 	new_Circle(&c[2]);
 	c[2].color = COLOR_BLUE;
 	c[2].as.circle.set( &c[2], 80, 80, 10 );
 	c[2].v.set_v(&(c[2].v), 3, 2);
 	c[2].v.set_a(&(c[2].v), 0, -2);
+	c[2].breakable = 1;
 
 	new_Circle(&c[3]);
 	c[3].color = COLOR_GREEN;
 	c[3].as.circle.set( &c[3], 150, 130, 12 );
 	c[3].v.set_v(&(c[3].v), 9, 9);
 	c[3].v.set_a(&(c[3].v), 0, 2);
+	c[3].breakable = 1;
 
 	new_Box(&b[0]);
 	b[0].color = COLOR_VIOLET;
 	b[0].as.box.set(&b[0], 30, 100, 10, 10);
 	b[0].v.set_v(&(b[0].v), 4, 4);
 	b[0].v.set_a(&(b[0].v), 0, 0);
+	b[0].breakable = 1;
 
 	new_Box(&b[1]);
 	b[1].color = COLOR_WHITE;

@@ -9,17 +9,22 @@
 #include "box.h"
 
 #define COLOR_BLACK     0
+#define COLOR_WHITE     BGR(31, 31, 31)
 
 inline void
 new_Shape (Shape *s)
 {
+	s->breakable = 0;
+
 	s->pre_p = s->p;
 
-	s->move  = move_shape;
-	s->erase = erase_shape;
+	s->move   = move_shape;
+	s->erase  = erase_shape;
+	s->redraw = redraw_shape;
 
-	s->draw_all  = draw_all_shapes;
-	s->erase_all = erase_all_shapes;
+	s->draw_all   = draw_all_shapes;
+	s->erase_all  = erase_all_shapes;
+	s->redraw_all = redraw_all_shapes;
 
 	s->run   = shape_run;
 
@@ -38,16 +43,19 @@ chain_shapes (int n, ...)
 	s  = va_arg(shapes, Shape *);
 	n1 = va_arg(shapes, Shape *);
 
-	s->next = n1;
+	s->next  = n1;
+	n1->prev = s;
 
 	for (i = 2; i < n; i++) {
 		n2 = va_arg(shapes, Shape *);
 		n1->next = n2;
+		n2->prev = n1;
 
 		n1 = n2;
 	}
 
 	n2->next = s;
+	s->prev  = n2;
 
 	va_end(shapes);
 }
@@ -93,6 +101,10 @@ touch_c2b (Shape *c, Shape *b)
 int
 touch_two_shapes(Shape *s1, Shape *s2)
 {
+	if (!s1->breakable && s2->breakable || s1 == s2) {
+		return 0;
+	}
+
 	if (s1->type == 1 && s2->type == 1) {
 		int r = s1->as.circle.r + s2->as.circle.r;
 
@@ -117,19 +129,81 @@ touch_two_shapes(Shape *s1, Shape *s2)
 	}
 }
 
-int
-touch_shapes (Shape *s)
+inline Shape *
+run_two_side_list (Shape *s, int (*f)(Shape *, Shape *) )
 {
-	Shape *n = s->next;
-	int flag = 0;
+	Shape *p   = s->prev,
+		  *n   = s;
+	int flag_n = 0,
+		flag_p = 0;
 
-	while (s != n && n != NULL) {
-		flag = flag || touch_two_shapes(s, n);
+	while (n != p && p != NULL && n != NULL) {
+		flag_n = f(s, n);
+		flag_p = f(s, p);
 
+		if (p->prev == n || flag_n || flag_p) {
+			break;
+		}
+		p = p->prev;
 		n = n->next;
 	}
 
-	return flag;
+	if (flag_n) {
+		return n;
+	}
+	else if (flag_p) {
+		return p;
+	}
+	else if ( f(s, p) ) {
+		return p;
+	}
+	else {
+		return NULL;
+	}
+}
+
+inline void
+break_shape (Shape *s)
+{
+	s->color = COLOR_BLACK;
+
+	s->prev->next = s->next;
+	s->next->prev = s->prev;
+
+	s->next = NULL;
+	s->prev = NULL;
+
+	s->draw(s);
+	s->erase(s);
+}
+
+int
+touch_shapes (Shape *s)
+{
+	Shape *n;
+
+	inline int f (Shape *s1, Shape *s2) {
+		return touch_two_shapes(s1, s2);
+	}
+
+	n = run_two_side_list(s, f);
+
+	if (n != NULL && s->breakable) {
+		break_shape(s);
+
+		if (n->v.reflectable) {
+			n->color = BGR(31, 10, 31);
+			n->v.reflect_x(&(n->v));
+			n->v.reflect_y(&(n->v));
+		}
+		else if (n->breakable) {
+			break_shape(n);
+		}
+
+		n->color = COLOR_WHITE;
+	}
+
+	return n != NULL;
 }
 
 int
@@ -137,7 +211,7 @@ move_shape (Shape *s, int x, int y)
 {
 	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
 	
-	if ( s->in_screen(s) ) {
+	if ( s->in_screen(s) && !s->touch(s) ) {
 		if (s->type == 2) {
 			s->as.box.update_apex(s);
 		}
@@ -151,7 +225,8 @@ move_shape (Shape *s, int x, int y)
 }
 
 inline void
-erase_shape (Shape *s){
+erase_shape (Shape *s)
+{
 	hword c = s->color;
 	int   x = s->p.x,
 		  y = s->p.y;
@@ -167,36 +242,53 @@ erase_shape (Shape *s){
 }
 
 inline void
+redraw_shape (Shape *s)
+{
+	if ( s->p.x != s->pre_p.x || s->p.y != s->pre_p.y ) {
+		s->erase(s);
+		s->draw(s);
+	}
+}
+
+inline void
 draw_all_shapes (Shape *s)
 {
-	Shape *n = s->next;
-
-	s->draw(s);
-	while (s != n && n != NULL) {
-		n->draw(n);
-		n = n->next;
+	inline int f (Shape *s1, Shape *s2) {
+		s2->draw(s2);
+		return 0;
 	}
+
+	run_two_side_list(s, f);
 }
 
 inline void
 erase_all_shapes (Shape *s)
 {
-	Shape *n = s->next;
-
-	s->erase(s);
-	while (s != n && n != NULL) {
-		n->erase(n);
-		n = n->next;
+	inline int f (Shape *s1, Shape *s2) {
+		s2->erase(s2);
+		return 0;
 	}
+
+	run_two_side_list(s, f);
 }
 
+inline void
+redraw_all_shapes (Shape *s)
+{
+	inline int f (Shape *s1, Shape *s2) {
+		s2->redraw(s2);
+		return 0;
+	}
+
+	run_two_side_list(s, f);
+}
 
 void
 shape_run_body (Shape *s)
 {
 	int i, d, dx, dy;
 
-	s->v.set_v( &(s->v), s->v.dx + s->v.ax, s->v.dy + s->v.ay);
+	s->v.set_v( &(s->v), s->v.dx + s->v.ax, s->v.dy + s->v.ay );
 	s->pre_p.set( &(s->pre_p), s->p.x, s->p.y );
 
 	dx = s->v.dx;
@@ -206,12 +298,7 @@ shape_run_body (Shape *s)
 		dx *= -1;
 	}
 	for (i = 0; i < dx; i++) {
-		if ( ! s->move(s, d, 0) ) {
-			s->v.reflect_x( &(s->v) );
-			d *= -1 * s->v.reflectable;
-			s->move(s, d, 0);
-		}
-		else if ( s->touch(s) ) {
+		if ( !s->move(s, d, 0) ) {
 			s->v.reflect_x( &(s->v) );
 			d *= -1 * s->v.reflectable;
 			s->move(s, d, 0);
@@ -225,12 +312,7 @@ shape_run_body (Shape *s)
 		dy *= -1;
 	}
 	for (i = 0; i < dy; i++) {
-		if ( ! s->move(s, 0, d) ) {
-			s->v.reflect_y( &(s->v) );
-			d *= -1 * s->v.reflectable;
-			s->move(s, 0, d);
-		}
-		else if ( s->touch(s) ) {
+		if ( !s->move(s, 0, d) ) {
 			s->v.reflect_y( &(s->v) );
 			d *= -1 * s->v.reflectable;
 			s->move(s, 0, d);
@@ -246,7 +328,11 @@ shape_run (Shape *s)
 	shape_run_body(s);
 
 	while (s != n && n != NULL) {
-		shape_run_body(n);
+		n->touch(n);
+		
+		if (n->v.movable) {
+			shape_run_body(n);
+		}
 
 		n = n->next;
 	}
