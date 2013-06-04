@@ -1,5 +1,5 @@
 #include "gba.h"
-#include "string.h"
+#include <string.h>
 #include "point.h"
 #include "screen.h"
 #include "velocity.h"

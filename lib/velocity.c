@@ -26,7 +26,7 @@ set_velocity (Velocity *v, int x, int y)
 	v->dx = x;
 	v->dy = y;
 
-	if (x && y) {
+	if (x || y) {
 		v->movable = 1;
 	}
 }
@@ -36,7 +36,7 @@ set_accelerate (Velocity *v, int x, int y) {
 	v->ax = x;
 	v->ay = y;
 
-	if (x && y) {
+	if (x || y) {
 		v->movable = 1;
 	}
 }

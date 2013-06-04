@@ -8,20 +8,29 @@ delay_init (void) {
 }
 
 static inline void
-delay(hword val)
+wait_until (hword time)
 {
-	val += gba_register(TMR_COUNT0);
-	while (val != gba_register(TMR_COUNT0));
+	while (time != gba_register(TMR_COUNT0));
+}
+
+static inline void
+delay (hword val)
+{
+	wait_until(gba_register(TMR_COUNT0) + val);
 }
 
 static inline void 
-wait_until_vblank(void) {
+wait_until_vblank (void)
+{
 	while ((gba_register(LCD_STATUS) & 1) == 0);
 }
 
 static inline void 
-wait_while_vblank(void) {
+wait_while_vblank (void)
+{
 	while ((gba_register(LCD_STATUS) & 1));
 }
+
+
 
 #endif

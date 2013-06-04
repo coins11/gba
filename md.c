@@ -17,6 +17,7 @@
 int
 main () {
 	hword *fb = (hword*)VRAM;
+	hword begin;
 	Shape c[2];
 	Shape b[20];
 	Shape r;
@@ -30,7 +31,7 @@ main () {
 		c[i].color = COLOR_WHITE;
 		c[i].as.circle.set( &c[i], 70 + 20 * i, 70, 8 );
 		c[i].v.set_v(&(c[i].v), 5, 5);
-		c[i].v.set_a(&(c[i].v), 1, 1);
+		c[i].v.set_a(&(c[i].v), 0, 0);
 	}
 
 	for (i = 0; i < 10; i++) {
@@ -67,7 +68,8 @@ main () {
 	wait_while_vblank();
 	
 	while (1) {
-		key = gba_register(KEY_STATUS);
+		key   = gba_register(KEY_STATUS);
+		begin = gba_register(TMR_COUNT0);
 
 		if (! (key & KEY_DOWN)) {
 			r.v.set_a(&(r.v), r.v.ax, r.v.ax + 2);
@@ -93,10 +95,10 @@ main () {
 
 		r.run(&r);
 
+		wait_until(begin + 500);
+
 		wait_until_vblank();
 		r.redraw_all(&r);
 		wait_while_vblank();
-
-		delay(500);
 	}
 }

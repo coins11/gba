@@ -60,7 +60,7 @@ extern inline void new_Shape (Shape *);
 
 extern void chain_shapes (int, ...);
 
-extern int  move_shape (Shape *, int, int);
+extern inline int  move_shape (Shape *, int, int);
 extern inline void erase_shape (Shape *);
 extern inline void redraw_shape (Shape *);
 

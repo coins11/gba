@@ -1,6 +1,8 @@
 #include "gba.h"
 #include "libgba/gba_systemcalls.h"
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "point.h"
 #include "vector.h"
 #include "velocity.h"
@@ -9,7 +11,6 @@
 #include "box.h"
 
 #define COLOR_BLACK     0
-#define COLOR_WHITE     BGR(31, 31, 31)
 
 inline void
 new_Shape (Shape *s)
@@ -60,7 +61,7 @@ chain_shapes (int n, ...)
 	va_end(shapes);
 }
 
-int
+inline int
 touch_c2b (Shape *c, Shape *b)
 {
 	Vector pq, pm, qm;
@@ -70,6 +71,13 @@ touch_c2b (Shape *c, Shape *b)
 		{1, 3, 2, 0}
 	};
 	int r = c->as.circle.r;
+
+	if ( c->p.x < b->as.box.apex[0].x - r || 
+		 c->p.x > b->as.box.apex[1].x + r ||
+		 c->p.y < b->as.box.apex[0].y - r ||
+		 c->p.y > b->as.box.apex[2].y + r ) {
+		return 0;
+	}
 
 	for (i = 0; i < 4; i++) {
 		if ( b->as.box.apex[i].distance( &(b->as.box.apex[i]), &(c->p) ) <= r * r ) {
@@ -96,37 +104,6 @@ touch_c2b (Shape *c, Shape *b)
 		}
 	}
 	return 0;
-}
-
-int
-touch_two_shapes(Shape *s1, Shape *s2)
-{
-	if (!s1->breakable && s2->breakable || s1 == s2) {
-		return 0;
-	}
-
-	if (s1->type == 1 && s2->type == 1) {
-		int r = s1->as.circle.r + s2->as.circle.r;
-
-		return s1->p.distance( &(s1->p), &(s2->p) ) < r * r;
-	} 
-	else if (s1->type == 1 && s2->type == 2) {
-		return touch_c2b(s1, s2);
-	}
-	else if (s1->type == 2 && s2->type == 1) {
-		return touch_c2b(s2, s1);
-	}
-	else if (s1->type == 2 && s2->type == 2) {
-		Box *b1 = &(s1->as.box),
-			*b2 = &(s2->as.box);
-
-		return b1->apex[0].x < b2->apex[3].x &&
-			   b2->apex[0].x < b1->apex[3].x &&
-			   b2->apex[0].y < b1->apex[3].y &&
-			   b1->apex[0].y < b2->apex[3].y;
-	} else {
-		return 0;
-	}
 }
 
 inline Shape *
@@ -162,6 +139,37 @@ run_two_side_list (Shape *s, int (*f)(Shape *, Shape *) )
 	}
 }
 
+inline int
+touch_two_shapes(Shape *s1, Shape *s2)
+{
+	if (s1 == s2) {
+		return 0;
+	}
+	else if (s1->type == 1 && s2->type == 1) {
+		int r = s1->as.circle.r + s2->as.circle.r;
+
+		return s1->p.distance( &(s1->p), &(s2->p) ) < r * r;
+	} 
+	else if (s1->type == 1 && s2->type == 2) {
+		return touch_c2b(s1, s2);
+	}
+	else if (s1->type == 2 && s2->type == 1) {
+		return touch_c2b(s2, s1);
+	}
+	else if (s1->type == 2 && s2->type == 2) {
+		Box *b1 = &(s1->as.box),
+			*b2 = &(s2->as.box);
+
+		return b1->apex[0].x < b2->apex[3].x &&
+			   b2->apex[0].x < b1->apex[3].x &&
+			   b2->apex[0].y < b1->apex[3].y &&
+			   b1->apex[0].y < b2->apex[3].y;
+	}
+	else {
+		return 0;
+	}
+}
+
 inline void
 break_shape (Shape *s)
 {
@@ -188,25 +196,22 @@ touch_shapes (Shape *s)
 
 	n = run_two_side_list(s, f);
 
-	if (n != NULL && s->breakable) {
-		break_shape(s);
-
-		if (n->v.reflectable) {
-			n->color = BGR(31, 10, 31);
-			n->v.reflect_x(&(n->v));
-			n->v.reflect_y(&(n->v));
+	if (n != NULL) {
+		if (s->breakable) {
+			break_shape(s);
 		}
-		else if (n->breakable) {
+
+		if (n->breakable) {
 			break_shape(n);
 		}
 
-		n->color = COLOR_WHITE;
+		return 1;
+	} else {
+		return 0;
 	}
-
-	return n != NULL;
 }
 
-int
+inline int
 move_shape (Shape *s, int x, int y)
 {
 	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
@@ -283,39 +288,74 @@ redraw_all_shapes (Shape *s)
 	run_two_side_list(s, f);
 }
 
+inline int
+abs (int n)
+{
+	return (n < 0 ? n * -1 : n);
+}
+
 void
 shape_run_body (Shape *s)
 {
-	int i, d, dx, dy;
+	int i, j, x, y, p, m, n;
+	int k, d, dg, dl, xb, yb;
+	void (*fg)(Velocity *);
+	void (*fl)(Velocity *);
 
 	s->v.set_v( &(s->v), s->v.dx + s->v.ax, s->v.dy + s->v.ay );
 	s->pre_p.set( &(s->pre_p), s->p.x, s->p.y );
 
-	dx = s->v.dx;
-	d  = 1;
-	if (dx < 0) {
-		d  =  -1;
-		dx *= -1;
-	}
-	for (i = 0; i < dx; i++) {
-		if ( !s->move(s, d, 0) ) {
-			s->v.reflect_x( &(s->v) );
-			d *= -1 * s->v.reflectable;
-			s->move(s, d, 0);
+	x  = abs(s->v.dx);
+	y  = abs(s->v.dy);
+
+	xb = x > y;
+	yb = y >= x;
+
+	n  = (xb ? y : x);
+
+	dg = ( xb ? (s->v.dx < 0 ? -1 : 1) : ( s->v.dy < 0 ? -1 : 1 ) );
+	dl = ( yb ? (s->v.dx < 0 ? -1 : 1) : ( s->v.dy < 0 ? -1 : 1 ) );
+
+	fg = ( xb ? s->v.reflect_x : s->v.reflect_y );
+	fl = ( yb ? s->v.reflect_x : s->v.reflect_y );
+
+	if (x == 0) {
+		d = ( s->v.dy < 0 ? -1 : 1 ); 
+
+		for (i = 0; i < y; i++) {
+			if ( !s->move(s, 0, d) ) {
+				s->v.reflect_y( &(s->v) );
+				d *= -1 * s->v.reflectable;
+			}
+		}
+	} 
+	else if (y == 0) {
+		d = ( s->v.dx < 0 ? -1 : 1 );
+
+		for (i = 0; i < x; i++) {
+			if ( !s->move(s, d, 0) ) {
+				s->v.reflect_x( &(s->v) );
+				d *= -1 * s->v.reflectable;
+			}
 		}
 	}
+	else {
+		p  = ( xb ? Div(x, y) : Div(y, x) );
+		m  = ( xb ? DivMod(x, y) : DivMod(y, x) );
 
-	dy = s->v.dy;
-	d  = 1;
-	if (dy < 0) {
-		d  =  -1;
-		dy *= -1;
-	}
-	for (i = 0; i < dy; i++) {
-		if ( !s->move(s, 0, d) ) {
-			s->v.reflect_y( &(s->v) );
-			d *= -1 * s->v.reflectable;
-			s->move(s, 0, d);
+		for (i = 0; i < n; i++) {
+			if ( !s->move(s, dl * !xb, dl * !yb) ) {
+				fl( &(s->v) );
+				dl *= -1 * s->v.reflectable;
+			}
+
+			k = (m-- > 0 ? 0 : 1);
+			for (j = 0; j < (p + k); j++) {
+				if ( !s->move(s, dg * xb, dg * yb) ) {
+					fg( &(s->v) );
+					dg *= -1 * s->v.reflectable;
+				}
+			}
 		}
 	}
 }
@@ -323,17 +363,15 @@ shape_run_body (Shape *s)
 void
 shape_run (Shape *s)
 {
-	Shape *n = s->next;
+	Shape *n;
 
-	shape_run_body(s);
+	if (s->v.movable) {
+		shape_run_body(s);
+	}
 
-	while (s != n && n != NULL) {
-		n->touch(n);
-		
+	for (n = s->next; s != n && n != NULL; n = n->next) {
 		if (n->v.movable) {
 			shape_run_body(n);
 		}
-
-		n = n->next;
 	}
 }
