@@ -39,6 +39,8 @@ struct shape {
 		Box box;
 	} as;
 
+	void (*callback) (struct shape *, int);
+
 	void (*draw) (struct shape *);
 	int  (*move) (struct shape *, int, int);
 	void (*erase) (struct shape *);
@@ -50,6 +52,7 @@ struct shape {
 
 	int (*in_screen) (struct shape *);
 	int (*on_area_border) (struct shape *);
+	int (*on_bottom_border) (struct shape *);
 
 	void (*run) (struct shape *);
 

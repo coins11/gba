@@ -14,6 +14,15 @@
 #define COLOR_VIOLET    BGR(31, 10, 31)
 #define COLOR_BLACK     0
 
+inline void
+change_color (Shape *s, int m) {
+	if ( s->on_bottom_border(s) ) {
+		s->color = COLOR_RED;
+	} else {
+		//s->color = COLOR_WHITE;
+	}
+}
+
 int
 main () {
 	hword *fb = (hword*)VRAM;
@@ -32,6 +41,7 @@ main () {
 		c[i].as.circle.set( &c[i], 70 + 20 * i, 70, 8 );
 		c[i].v.set_v(&(c[i].v), 5, 5);
 		c[i].v.set_a(&(c[i].v), 0, 0);
+		c[i].callback = change_color;
 	}
 
 	for (i = 0; i < 10; i++) {

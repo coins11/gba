@@ -22,5 +22,6 @@ extern inline void draw_circle (Shape *);
 
 extern inline int circle_in_screen (Shape *);
 extern inline int circle_on_area_border (Shape *);
+extern inline int circle_on_bottom_border (Shape *);
 
 #endif

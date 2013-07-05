@@ -29,8 +29,9 @@ new_Box (Shape *s)
 
 	s->draw  = draw_box;
 
-	s->in_screen      = box_in_screen;
-	s->on_area_border = box_on_area_border;
+	s->in_screen        = box_in_screen;
+	s->on_area_border   = box_on_area_border;
+	s->on_bottom_border = box_on_bottom_border;
 }
 
 inline void
@@ -85,3 +86,10 @@ box_on_area_border (Shape *s)
 		on_updown_area_border(s->p.y + b->height);
 }
 
+inline int
+box_on_bottom_border (Shape *s)
+{
+	Box *b = &(s->as.box);
+
+	return on_updown_area_border(s->p.y + b->height);
+}

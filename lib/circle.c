@@ -26,8 +26,9 @@ new_Circle (Shape *s)
 	c->some_border = some_circle_border;
 	c->do_border   = do_circle_border;
 
-	s->in_screen      = circle_in_screen;
-	s->on_area_border = circle_on_area_border;
+	s->in_screen        = circle_in_screen;
+	s->on_area_border   = circle_on_area_border;
+	s->on_bottom_border = circle_on_bottom_border;
 }
 
 inline void
@@ -167,3 +168,10 @@ circle_on_area_border (Shape *s)
 		   on_area_border(s->p.x - c->r, s->p.y - c->r);
 }
 
+inline int
+circle_on_bottom_border (Shape *s)
+{
+	Circle *c = &(s->as.circle);
+
+	return on_area_border(s->p.x + c->r, s->p.y + c->r);
+}

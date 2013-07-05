@@ -16,6 +16,7 @@ inline void
 new_Shape (Shape *s)
 {
 	s->breakable = 0;
+	s->callback  = NULL;
 
 	s->pre_p = s->p;
 
@@ -221,8 +222,12 @@ move_shape (Shape *s, int x, int y)
 			s->as.box.update_apex(s);
 		}
 
+		s->callback(s, 1);
+
 		return 1;
 	} else {
+		s->callback(s, 0);
+
 		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
 
 		return 0;
