@@ -222,11 +222,15 @@ move_shape (Shape *s, int x, int y)
 			s->as.box.update_apex(s);
 		}
 
-		s->callback(s, 1);
+		if (s->callback != NULL) {
+			s->callback(s, 1);
+		}
 
 		return 1;
 	} else {
-		s->callback(s, 0);
+		if (s->callback != NULL) {
+			s->callback(s, 0);
+		}
 
 		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
 

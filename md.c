@@ -18,6 +18,7 @@ inline void
 change_color (Shape *s, int m) {
 	if ( s->on_bottom_border(s) ) {
 		s->color = COLOR_RED;
+		//while(1);
 	} else {
 		//s->color = COLOR_WHITE;
 	}
