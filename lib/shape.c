@@ -15,8 +15,11 @@
 inline void
 new_Shape (Shape *s)
 {
+	s->id        = -1;
 	s->breakable = 0;
-	s->callback  = NULL;
+
+	s->move_callback  = NULL;
+	s->touch_callback = NULL;
 
 	s->pre_p = s->p;
 
@@ -198,6 +201,14 @@ touch_shapes (Shape *s)
 	n = run_two_side_list(s, f);
 
 	if (n != NULL) {
+		if ( s->touch_callback != NULL && s->touch_callback(s, n) ) {
+			return 0;
+		}
+
+		if (n->touch_callback != NULL) {
+			n->touch_callback(n, s);
+		}
+
 		if (s->breakable) {
 			break_shape(s);
 		}
@@ -222,14 +233,14 @@ move_shape (Shape *s, int x, int y)
 			s->as.box.update_apex(s);
 		}
 
-		if (s->callback != NULL) {
-			s->callback(s, 1);
+		if (s->move_callback != NULL) {
+			s->move_callback(s, 1);
 		}
 
 		return 1;
 	} else {
-		if (s->callback != NULL) {
-			s->callback(s, 0);
+		if (s->move_callback != NULL) {
+			s->move_callback(s, 0);
 		}
 
 		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
@@ -258,7 +269,7 @@ erase_shape (Shape *s)
 inline void
 redraw_shape (Shape *s)
 {
-	if ( s->p.x != s->pre_p.x || s->p.y != s->pre_p.y ) {
+	if ( s->p.x != s->pre_p.x || s->p.y != s->pre_p.y  ) {
 		s->erase(s);
 		s->draw(s);
 	}
@@ -369,9 +380,10 @@ shape_run_body (Shape *s)
 	}
 }
 
-void
+int
 shape_run (Shape *s)
 {
+	int i = 1;
 	Shape *n;
 
 	if (s->v.movable) {
@@ -379,8 +391,11 @@ shape_run (Shape *s)
 	}
 
 	for (n = s->next; s != n && n != NULL; n = n->next) {
+		i++;
 		if (n->v.movable) {
 			shape_run_body(n);
 		}
 	}
+
+	return i;
 }

@@ -16,6 +16,9 @@ new_Velocity (Velocity *v)
 	v->set_v  = set_velocity;
 	v->set_a  = set_accelerate;
 
+	v->add_v  = add_velocity;
+	v->add_a  = add_accelarate;
+
 	v->reflect_x = velocity_reflect_x;
 	v->reflect_y = velocity_reflect_y;
 }
@@ -37,6 +40,26 @@ set_accelerate (Velocity *v, int x, int y) {
 	v->ay = y;
 
 	if (x || y) {
+		v->movable = 1;
+	}
+}
+
+inline void
+add_velocity (Velocity *v, int x, int y) {
+	v->dx += x;
+	v->dy += y;
+
+	if (v->dx || v->dy) {
+		v->movable = 1;
+	}
+}
+
+inline void
+add_accelarate (Velocity *v, int x, int y) {
+	v->ax += x;
+	v->ay += y;
+
+	if (v->ax || v->ay) {
 		v->movable = 1;
 	}
 }

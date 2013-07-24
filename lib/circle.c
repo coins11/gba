@@ -173,5 +173,5 @@ circle_on_bottom_border (Shape *s)
 {
 	Circle *c = &(s->as.circle);
 
-	return on_area_border(s->p.x + c->r, s->p.y + c->r);
+	return on_area_border(10, s->p.y + c->r);
 }

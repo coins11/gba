@@ -9,7 +9,8 @@ typedef struct box {
 
 	Point apex[4];
 
-	void (*set) (Shape *, int, int, int, int);
+	void (*set)    (Shape *, int, int, int, int);
+	int  (*resize) (Shape *, int, int);
 
 	void (*update_apex) (Shape *);
 } Box;
@@ -32,6 +33,7 @@ struct shape {
 	hword color;
 	Velocity v;
 	int type;
+	int id;
 	int breakable;
 
 	union {
@@ -39,7 +41,8 @@ struct shape {
 		Box box;
 	} as;
 
-	void (*callback) (struct shape *, int);
+	void (*move_callback)  (struct shape *, int);
+	int  (*touch_callback) (struct shape *, struct shape *);
 
 	void (*draw) (struct shape *);
 	int  (*move) (struct shape *, int, int);
@@ -54,7 +57,7 @@ struct shape {
 	int (*on_area_border) (struct shape *);
 	int (*on_bottom_border) (struct shape *);
 
-	void (*run) (struct shape *);
+	int (*run) (struct shape *);
 
 	int (*touch) (struct shape *);
 };
@@ -71,7 +74,7 @@ extern inline void draw_all_shapes (Shape *);
 extern inline void erase_all_shapes (Shape *);
 extern inline void redraw_all_shapes (Shape *);
 
-extern void shape_run (Shape *);
+extern int shape_run (Shape *);
 extern inline void break_shape (Shape *);
 extern int touch_shapes (Shape *);
 #endif

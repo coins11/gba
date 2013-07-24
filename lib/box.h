@@ -7,6 +7,7 @@
 extern inline void new_Box (Shape *);
 
 extern inline void set_data_of_box (Shape *, int, int, int, int);
+extern inline int  resize_box (Shape *, int, int);
 extern inline void update_apex_of_box (Shape *);
 
 extern inline void draw_box (Shape *);

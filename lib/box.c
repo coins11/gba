@@ -26,6 +26,7 @@ new_Box (Shape *s)
 
 	b->set         = set_data_of_box;
 	b->update_apex = update_apex_of_box;
+	b->resize      = resize_box;
 
 	s->draw  = draw_box;
 
@@ -54,6 +55,25 @@ update_apex_of_box (Shape *s)
 	b->apex[1].set( &(b->apex[1]), s->p.x + b->width, s->p.y );
 	b->apex[2].set( &(b->apex[2]), s->p.x, s->p.y + b->height );
 	b->apex[3].set( &(b->apex[3]), s->p.x + b->width, s->p.y + b->height );
+}
+
+inline int
+resize_box (Shape *s, int dw, int dh) {
+	Box *b = &(s->as.box);
+
+	if ( (b->width + dw) > 0 && (b->height + dh) > 0 ) {
+		s->erase(s);
+
+		b->width  += dw;
+		b->height += dh;
+
+		b->update_apex(s);
+		s->draw(s);
+
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 inline void
