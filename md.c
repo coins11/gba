@@ -7,6 +7,7 @@
 #include "lib/circle.h"
 #include "lib/delay.h"
 #include "lib/print.h"
+#include "lib/debug.h"
 
 #define COLOR_WHITE     BGR(31, 31, 31)
 #define COLOR_BLUE      BGR(0, 0, 31)
@@ -44,7 +45,7 @@ shrink_racket (Shape *r, Shape *s) {
 inline int
 accelerate_racket (Shape *ball, Shape *block) {
 	if (block->id == BLOCK_ID) {
-		ball->v.add_v( &(ball->v), 1, 1 );
+		ball->v.up_v( &(ball->v), 1, 1 );
 	}
 
 	return 0;
@@ -67,11 +68,12 @@ init_circles (Shape *c, int l, int r, int x, int y) {
 		if (i == 0) {
 			c[i].v.set_v(&(c[i].v), 1, 1);
 		} else {
-			c[i].v.set_v(&(c[i].v), -2, -2);
+			c[i].v.set_v(&(c[i].v), -1, -1);
 		}
 
-		c[i].move_callback  = die_on_bottom;
-		c[i].touch_callback = accelerate_racket;
+		c[i].move_callback = die_on_bottom;
+		//c[i].touch_callback = accelerate_racket;
+		c[i].update_mn(&c[i]);
 	}
 }
 
@@ -86,25 +88,27 @@ init_blocks (Shape *b, int l, int s, int x, int y, int w, int h) {
 		b[i].v.set_a(&(b[i].v), 0, 0);
 		b[i].breakable = 1;
 		b[i].touch_callback = pierce_block;
+		b[i].update_mn(&b[i]);
 	}
 }
+
 
 inline void
 move_racket (Shape *r, int key) {
 	if (! (key & KEY_L)) {
-		r->v.set_a(&(r->v), r->v.ax - 2, r->v.ay);
+		r->v.up_a(&(r->v), -2, 0);
 	} else if (! (key & KEY_R)) {
-		r->v.set_a(&(r->v), r->v.ax + 2, r->v.ay);
+		r->v.up_a(&(r->v), 2,  0);
 	} else {
-		r->v.set_a(&(r->v), 0, r->v.ay);
+		r->v.down_a(&(r->v), 2, 0);
 	}
 
 	if (! (key & KEY_LEFT)) {
-		r->v.set_v(&(r->v), r->v.dx - 1, r->v.dy);
+		r->v.up_v(&(r->v), -2, 0);
 	} else if (! (key & KEY_RIGHT)) {
-		r->v.set_v(&(r->v), r->v.dx + 1, r->v.dy);
+		r->v.up_v(&(r->v), 2,  0);
 	} else {
-		r->v.set_v(&(r->v), 0, r->v.dy);
+		r->v.down_v(&(r->v), 2, 0);
 	}
 }
 
@@ -139,7 +143,8 @@ main () {
 	r.v.set_v(&(r.v), 0, 0);
 	r.v.set_a(&(r.v), 0, 0);
 	r.v.reflectable  = 0;
-	r.touch_callback = shrink_racket;
+	r.update_mn(&r);
+	//r.touch_callback = shrink_racket;
 
 	wait_until_vblank();
 	r.draw_all(&r);
@@ -187,6 +192,7 @@ main () {
 				break;
 			case RUN:
 				move_racket(&r, key);
+				r.update_mn(&r);
 
 				if (r.run(&r) == 3) {
 					STATE = CLEAR;

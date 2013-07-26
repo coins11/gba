@@ -32,9 +32,11 @@ struct shape {
 	Point p, pre_p;
 	hword color;
 	Velocity v;
+
 	int type;
 	int id;
 	int breakable;
+	int mn;
 
 	union {
 		Circle circle;
@@ -60,6 +62,9 @@ struct shape {
 	int (*run) (struct shape *);
 
 	int (*touch) (struct shape *);
+
+	int  (*same_space) (struct shape *, struct shape *);
+	void (*update_mn)  (struct shape *);
 };
 
 extern inline void new_Shape (Shape *);
@@ -77,4 +82,13 @@ extern inline void redraw_all_shapes (Shape *);
 extern int shape_run (Shape *);
 extern inline void break_shape (Shape *);
 extern int touch_shapes (Shape *);
+
+//extern inline byte separate_bit (byte);
+//extern inline byte morton_number (int, int);
+//extern inline int  mn_index (int, int, int, int);
+//extern inline int  box_mn (Shape *);
+//extern inline int  circle_mn (Shape *);
+//extern inline void update_mn (Shape *);
+//extern inline int  same_space (Shape *, Shape *);
+
 #endif

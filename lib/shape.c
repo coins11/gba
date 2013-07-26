@@ -9,14 +9,20 @@
 #include "shape.h"
 #include "circle.h"
 #include "box.h"
+#include "quadtree.h"
+#include "debug.h"
 
 #define COLOR_BLACK     0
 
 inline void
 new_Shape (Shape *s)
 {
+	int i;
+
 	s->id        = -1;
 	s->breakable = 0;
+	s->mn        = 0;
+
 
 	s->move_callback  = NULL;
 	s->touch_callback = NULL;
@@ -34,6 +40,9 @@ new_Shape (Shape *s)
 	s->run   = shape_run;
 
 	s->touch = touch_shapes;
+
+	s->update_mn  = update_mn;
+	s->same_space = same_space;
 }
 
 void
@@ -146,7 +155,10 @@ run_two_side_list (Shape *s, int (*f)(Shape *, Shape *) )
 inline int
 touch_two_shapes(Shape *s1, Shape *s2)
 {
-	if (s1 == s2) {
+	if ( !same_space(s1, s2) ) {
+		return 0;
+	}
+	if ( s1 == s2 ) {
 		return 0;
 	}
 	else if (s1->type == 1 && s2->type == 1) {
@@ -194,11 +206,7 @@ touch_shapes (Shape *s)
 {
 	Shape *n;
 
-	inline int f (Shape *s1, Shape *s2) {
-		return touch_two_shapes(s1, s2);
-	}
-
-	n = run_two_side_list(s, f);
+	n = run_two_side_list(s, touch_two_shapes);
 
 	if (n != NULL) {
 		if ( s->touch_callback != NULL && s->touch_callback(s, n) ) {
@@ -236,6 +244,8 @@ move_shape (Shape *s, int x, int y)
 		if (s->move_callback != NULL) {
 			s->move_callback(s, 1);
 		}
+
+		//s->update_mn(s);
 
 		return 1;
 	} else {
@@ -322,7 +332,7 @@ shape_run_body (Shape *s)
 	void (*fg)(Velocity *);
 	void (*fl)(Velocity *);
 
-	s->v.set_v( &(s->v), s->v.dx + s->v.ax, s->v.dy + s->v.ay );
+	s->v.up_v( &(s->v), s->v.ax, s->v.ay );
 	s->pre_p.set( &(s->pre_p), s->p.x, s->p.y );
 
 	x  = abs(s->v.dx);
@@ -351,7 +361,6 @@ shape_run_body (Shape *s)
 	} 
 	else if (y == 0) {
 		d = ( s->v.dx < 0 ? -1 : 1 );
-
 		for (i = 0; i < x; i++) {
 			if ( !s->move(s, d, 0) ) {
 				s->v.reflect_x( &(s->v) );
@@ -392,6 +401,7 @@ shape_run (Shape *s)
 
 	for (n = s->next; s != n && n != NULL; n = n->next) {
 		i++;
+
 		if (n->v.movable) {
 			shape_run_body(n);
 		}
@@ -399,3 +409,4 @@ shape_run (Shape *s)
 
 	return i;
 }
+
