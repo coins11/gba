@@ -3,5 +3,6 @@
 
 extern inline void draw_char(hword *, int, hword);
 extern inline void draw_str(char *, int, int, hword);
+extern inline void draw_int(int, int, int, hword);
 
 #endif

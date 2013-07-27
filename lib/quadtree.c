@@ -4,6 +4,7 @@
 #include "shape.h"
 #include "quadtree.h"
 #include "debug.h"
+#include "print.h"
 
 inline byte
 separate_bit (byte n)
@@ -21,6 +22,7 @@ morton_number (int x, int y)
 	int i, d;
 
 	d = Div(LCD_WIDTH, SPACE_NUM);
+	mx = SPACE_NUM - 1;
 	for (i = 1; i <= SPACE_NUM; i++) {
 		if (x < (d * i)) {
 			mx = i - 1;
@@ -29,6 +31,7 @@ morton_number (int x, int y)
 	}
 
 	d = Div(LCD_HEIGHT, SPACE_NUM);
+	my = SPACE_NUM - 1;
 	for (i = 1; i <= SPACE_NUM; i++) {
 		if (y < (d * i)) {
 			my = i - 1;
@@ -44,20 +47,23 @@ mn_index (int x1, int y1, int x2, int y2)
 {
 	byte ul = morton_number(x1, y1);
 	byte br = morton_number(x2, y2);
-
 	byte sm = ul ^ br;
+	int i;
+	int l[] = {85, 21, 5, 1};
 
-	if ( sm >> 6 ) {
+	for (i = 0; (sm >> (i * 2)) != 0; i++);
+
+	//vbaPrint("-------1-------\n");
+	//vbaIntPrint(ul);
+	//vbaIntPrint(br);
+	//vbaIntPrint(sm);
+	//vbaPrint("-------2-------\n");
+	if (sm == 0) {
+		return (int)(ul) + l[0]; 
+	} else if (i < 4) {
+		return (int)( (ul >> (i * 2) ) ) + l[i];
+	} else {
 		return 0;
-	}
-	else if ( (sm >> 4) & 0x3 ) { // 0x3 = 00 00 00 11
-		return (int)((sm >> 4) & 0x3) + 1;
-	}
-	else if ( (sm >> 2) & 0x3 ) {
-		return (int)((sm >> 2) & 0x3) + 5;
-	}
-	else {
-		return (int)(ul) + 21;
 	}
 }
 
@@ -87,52 +93,56 @@ update_mn (Shape *s)
 inline int
 mn_class (int mn, int c)
 {
-	if (c == 0) { // parent
-		if (mn < 1) {
-			return -1;
-		} else if (mn < 5) {
-			return (mn - 1);
-		} else if (mn < 21) {
-			return (mn - 5) >> 2;
-		} else {
-			return (mn - 21) >> 4;
+	int i;
+	int l[] = {1, 5, 21, 85};
+
+	if (mn < l[c]) {
+		return -1;
+	} else {
+		for (i = c; i < 3; i++) {
+			if (mn < l[i + 1]) {
+				return (mn - l[i]) >> ((i - c) * 2);
+			}
 		}
+		return (mn - l[i]) >> ((i - c) * 2);
 	}
-	else if (c == 1) { // child
-		if (mn < 5) {
-			return -1;
-		} else if (mn < 21) {
-			return (mn - 5) & 0x3;
-		} else {
-			return ((mn - 21) >> 2) & 0x3;
-		}
+}
+
+inline void
+update_mn_all(Shape *s)
+{
+	inline int f (Shape *s1, Shape *s2) {
+		s2->update_mn(s2);
+		return 0;
 	}
-	else if (c == 2) { // grandchild
-		if (mn < 21) {
-			return -1;
-		} else {
-			return (mn - 21) & 0x3;
+
+	run_two_side_list(s, f);
+}
+
+inline int
+same_space_int (int x, int y)
+{
+	int i;
+	int l[] = {1, 5, 21, 85};
+	int mn1 = (x < y ? x : y);
+	int mn2 = (x < y ? y : x);
+
+	if (mn1 == mn2 || mn1 < 1 || mn2 < 1) {
+		return 1;
+	} else {
+		for (i = 0; i < 3; i++) {
+			if (mn1 < l[i + 1]) {
+				return mn_class(mn1, i) == mn_class(mn2, i);
+			}
 		}
+
+		return mn_class(mn1, i) == mn_class(mn2, i);
 	}
 }
 
 inline int
 same_space (Shape *s1, Shape *s2)
 {
-	int mn1 = (s1->mn < s2->mn ? s1->mn : s2->mn);
-	int mn2 = (s1->mn < s2->mn ? s2->mn : s1->mn);
-
-	if (mn1 == mn2 || mn1 < 1 || mn2 < 1) {
-		return 1;
-	}
-	else if (mn1 < 5) {
-		return mn_class(mn1, 0) == mn_class(mn2, 0);
-	}
-	else if (mn1 < 21) {
-		return mn_class(mn1, 1) == mn_class(mn2, 1);
-	}
-	else {
-		return mn_class(mn1, 2) == mn_class(mn2, 2);
-	}
+	return same_space_int(s1->mn, s2->mn);
 }
 

@@ -81,7 +81,7 @@ draw_box (Shape *s)
 {
 	Box *b = &(s->as.box);
 	hword *base = (hword *)VRAM;
-	int x, y;
+	int y;
 
 	for (y = 1; y <= b->height; y++) {
 		memset((base + s->p.x + (s->p.y + y) * LCD_WIDTH), s->color, b->width*2);

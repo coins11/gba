@@ -7,6 +7,7 @@
 #include "lib/circle.h"
 #include "lib/delay.h"
 #include "lib/print.h"
+#include "lib/libgba/gba_systemcalls.h"
 #include "lib/debug.h"
 
 #define COLOR_WHITE     BGR(31, 31, 31)
@@ -66,8 +67,12 @@ init_circles (Shape *c, int l, int r, int x, int y) {
 		c[i].as.circle.set( &c[i], x + 20 * i, y, r );
 
 		if (i == 0) {
+			c[i].id    = 0xFF;
+			c[i].color = COLOR_WHITE;
 			c[i].v.set_v(&(c[i].v), 1, 1);
 		} else {
+			c[i].id    = 0xFE;
+			c[i].color = COLOR_RED;
 			c[i].v.set_v(&(c[i].v), -1, -1);
 		}
 
@@ -84,7 +89,7 @@ init_blocks (Shape *b, int l, int s, int x, int y, int w, int h) {
 		b[i].id    = BLOCK_ID;
 		b[i].color = COLOR_RED;
 		b[i].as.box.set(&b[i], (x + (i - s) * x), y, w, h);
-		b[i].v.set_v(&(b[i].v), (i % 5), (i % 3));
+		b[i].v.set_v(&(b[i].v), DivMod(i, 2), DivMod(i, 3));
 		b[i].v.set_a(&(b[i].v), 0, 0);
 		b[i].breakable = 1;
 		b[i].touch_callback = pierce_block;
@@ -114,11 +119,11 @@ move_racket (Shape *r, int key) {
 
 inline void
 init (Shape *c, Shape *b, Shape *r) {
-	init_circles(c, 2, 5, 70, 70);
-	init_blocks(b, 10, 0, 20, 10, 6, 6);
-	init_blocks(b, 20, 10, 20, 30, 6, 6);
+	init_circles(c, 2, 3, 70, 70);
+	init_blocks(b, 10, 0, 20, 10, 3, 3);
+	init_blocks(b, 20, 10, 20, 80, 3, 3);
 
-	chain_shapes(23, &c[0], &c[1], &b[0], &b[1], &b[2], &b[3], &b[4], &b[5], &b[6], &b[7], &b[8], &b[9], &b[10], &b[11], &b[12], &b[13], &b[14], &b[15], &b[16], &b[17], &b[18], &b[19], r );
+	chain_shapes(3, &c[0], &c[1],/* &b[0], &b[1], &b[2], &b[3], &b[4], &b[5], &b[6], &b[7], &b[8], &b[9], /*&b[10], &b[11], &b[12], &b[13], &b[14], &b[15], &b[16], &b[17], &b[18], &b[19],*/ r );
 }
 
 int
@@ -143,7 +148,6 @@ main () {
 	r.v.set_v(&(r.v), 0, 0);
 	r.v.set_a(&(r.v), 0, 0);
 	r.v.reflectable  = 0;
-	r.update_mn(&r);
 	//r.touch_callback = shrink_racket;
 
 	wait_until_vblank();
@@ -181,21 +185,19 @@ main () {
 				init(c, b, &r);
 				r.as.box.set(&r, 120, 150, 40, 5);
 
-				chain_shapes(23, &r, &c[0], &c[1], &b[0], &b[1], &b[2], &b[3], &b[4], &b[5], &b[6], &b[7], &b[8], &b[9], &b[10], &b[11], &b[12], &b[13], &b[14], &b[15], &b[16], &b[17], &b[18], &b[19] );
-
 				wait_until_vblank();
 				r.erase_all(&r);
 				r.draw_all(&r);
+				r.update_mn_all(&r);
 				wait_while_vblank();
 
 				STATE = START;
 				break;
 			case RUN:
 				move_racket(&r, key);
-				r.update_mn(&r);
 
 				if (r.run(&r) == 3) {
-					STATE = CLEAR;
+					//STATE = CLEAR;
 				}
 
 				wait_until(begin + 500);

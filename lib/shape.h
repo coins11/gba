@@ -48,6 +48,7 @@ struct shape {
 
 	void (*draw) (struct shape *);
 	int  (*move) (struct shape *, int, int);
+	int  (*direct_move) (struct shape *, int, int);
 	void (*erase) (struct shape *);
 	void (*redraw) (struct shape *);
 
@@ -63,8 +64,9 @@ struct shape {
 
 	int (*touch) (struct shape *);
 
-	int  (*same_space) (struct shape *, struct shape *);
-	void (*update_mn)  (struct shape *);
+	int  (*same_space)    (struct shape *, struct shape *);
+	void (*update_mn)     (struct shape *);
+	void (*update_mn_all) (struct shape *);
 };
 
 extern inline void new_Shape (Shape *);
@@ -72,6 +74,7 @@ extern inline void new_Shape (Shape *);
 extern void chain_shapes (int, ...);
 
 extern inline int  move_shape (Shape *, int, int);
+extern inline int  direct_move (Shape *, int, int);
 extern inline void erase_shape (Shape *);
 extern inline void redraw_shape (Shape *);
 
@@ -79,16 +82,10 @@ extern inline void draw_all_shapes (Shape *);
 extern inline void erase_all_shapes (Shape *);
 extern inline void redraw_all_shapes (Shape *);
 
+extern inline Shape * run_two_side_list (Shape *, int (*)(Shape *, Shape *));
+
 extern int shape_run (Shape *);
 extern inline void break_shape (Shape *);
 extern int touch_shapes (Shape *);
-
-//extern inline byte separate_bit (byte);
-//extern inline byte morton_number (int, int);
-//extern inline int  mn_index (int, int, int, int);
-//extern inline int  box_mn (Shape *);
-//extern inline int  circle_mn (Shape *);
-//extern inline void update_mn (Shape *);
-//extern inline int  same_space (Shape *, Shape *);
 
 #endif

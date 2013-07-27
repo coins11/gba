@@ -10,6 +10,8 @@ typedef struct velocity {
 	int reflectable;
 	int movable;
 
+	void (*set_movable) (struct velocity *);
+
 	void (*set_v) (struct velocity *, int, int);
 	void (*set_a) (struct velocity *, int, int);
 
@@ -24,6 +26,8 @@ typedef struct velocity {
 } Velocity;
 
 extern inline void new_Velocity (Velocity *);
+
+extern inline void set_movable (Velocity *);
 
 extern inline void set_velocity (Velocity *, int, int);
 extern inline void set_accelerate (Velocity *, int, int);

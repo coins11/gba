@@ -12,12 +12,12 @@ void vbaPrint(char *s)
 void vbaIntPrint(int n)
 {
 	int i;
-	char str[20];
+	char str[30];
 
-	n = n & 0xFF;
+	n = n & 0xFFFF;
 
-	for (i = 0; i < 8; i++, n = n << 1) {
-		if ( (n & 0x80) >> 7 ) {
+	for (i = 0; i < 16; i++, n = n << 1) {
+		if ( (n & 0x8000) >> 15 ) {
 			str[i] = '1';
 		} else {
 			str[i] = '0';

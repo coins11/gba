@@ -9,9 +9,9 @@ debug.o : lib/debug.c lib/debug.h
 crt.o : crt.S
 	arm-none-eabi-gcc -std=c99 -fgnu89-inline -O3 -c $<
 
-%.bin : %.c crt.o point.o box.o circle.o lib/delay.h screen.o velocity.o shape.o vector.o print.o quadtree.o debug.o
+%.bin : %.c crt.o point.o box.o circle.o lib/delay.h screen.o velocity.o shape.o vector.o print.o touch.o quadtree.o debug.o
 	arm-none-eabi-gcc -std=gnu99 -fgnu89-inline -O3 -c $<
-	arm-none-eabi-ld -o $*.out -T gcc.ls crt.o point.o vector.o screen.o print.o velocity.o box.o circle.o shape.o debug.o quadtree.o $*.o /Volumes/MacStorage/home/yoshimura_yuu/bin/arm-cs-tools/arm-none-eabi/lib/libc.a ./lib/libgba/libgba.a
+	arm-none-eabi-ld -o $*.out -T gcc.ls crt.o point.o vector.o screen.o print.o velocity.o box.o circle.o shape.o touch.o debug.o quadtree.o $*.o /Volumes/MacStorage/home/yoshimura_yuu/bin/arm-cs-tools/arm-none-eabi/lib/libc.a ./lib/libgba/libgba.a
 	arm-none-eabi-objcopy -O binary $*.out $*.bin
 
 %.mb : %.bin

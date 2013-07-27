@@ -21,7 +21,8 @@ draw_char (hword *ptr, int code, hword color)
 }
 
 inline void
-draw_str (char *str, int x, int y, hword color) {
+draw_str (char *str, int x, int y, hword color)
+{
 	hword *base = (hword *)VRAM;
 	int i;
 
@@ -30,3 +31,23 @@ draw_str (char *str, int x, int y, hword color) {
 	}
 }
 
+inline void
+draw_int (int n, int x, int y, hword color)
+{
+	hword *base = (hword *)VRAM;
+	int i;
+	char str[30];
+
+	n = n & 0xFFFF;
+
+	for (i = 0; i < 16; i++, n = n << 1) {
+		if ( (n & 0x8000) >> 15 ) {
+			str[i] = '1';
+		} else {
+			str[i] = '0';
+		}
+	}
+	str[i] = '\0';
+
+	draw_str(str, x, y, color);
+}

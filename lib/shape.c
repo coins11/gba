@@ -9,10 +9,9 @@
 #include "shape.h"
 #include "circle.h"
 #include "box.h"
+#include "touch.h"
 #include "quadtree.h"
 #include "debug.h"
-
-#define COLOR_BLACK     0
 
 inline void
 new_Shape (Shape *s)
@@ -29,9 +28,10 @@ new_Shape (Shape *s)
 
 	s->pre_p = s->p;
 
-	s->move   = move_shape;
-	s->erase  = erase_shape;
-	s->redraw = redraw_shape;
+	s->move        = move_shape;
+	s->direct_move = direct_move;
+	s->erase       = erase_shape;
+	s->redraw      = redraw_shape;
 
 	s->draw_all   = draw_all_shapes;
 	s->erase_all  = erase_all_shapes;
@@ -41,7 +41,9 @@ new_Shape (Shape *s)
 
 	s->touch = touch_shapes;
 
-	s->update_mn  = update_mn;
+	s->update_mn      = update_mn;
+	s->update_mn_all  = update_mn_all;
+
 	s->same_space = same_space;
 }
 
@@ -72,51 +74,6 @@ chain_shapes (int n, ...)
 	s->prev  = n2;
 
 	va_end(shapes);
-}
-
-inline int
-touch_c2b (Shape *c, Shape *b)
-{
-	Vector pq, pm, qm;
-	int i, cross, d;
-	int n[][4] = {
-		{0, 1, 3, 2},
-		{1, 3, 2, 0}
-	};
-	int r = c->as.circle.r;
-
-	if ( c->p.x < b->as.box.apex[0].x - r || 
-		 c->p.x > b->as.box.apex[1].x + r ||
-		 c->p.y < b->as.box.apex[0].y - r ||
-		 c->p.y > b->as.box.apex[2].y + r ) {
-		return 0;
-	}
-
-	for (i = 0; i < 4; i++) {
-		if ( b->as.box.apex[i].distance( &(b->as.box.apex[i]), &(c->p) ) <= r * r ) {
-			return 1;
-		}
-	}
-
-	new_Vector(&pq);
-	new_Vector(&pm);
-	new_Vector(&qm);
-
-	for (i = 0; i < 4; i++) {
-		pq.set( &pq, &(b->as.box.apex[n[0][i]]), &(b->as.box.apex[n[1][i]]) );
-		pm.set( &pm, &(b->as.box.apex[n[0][i]]), &(c->p) );
-		qm.set( &qm, &(b->as.box.apex[n[1][i]]), &(c->p) );
-
-		cross = pm.outer(&pm, &pq);
-		d     = Div( (cross * cross), pq.length2(&pq) );
-
-		if (d <= r * r) {
-			if (pm.inner(&pm, &pq) * qm.inner(&qm, &pq) <= 0) {
-				return 1;
-			}
-		}
-	}
-	return 0;
 }
 
 inline Shape *
@@ -153,85 +110,6 @@ run_two_side_list (Shape *s, int (*f)(Shape *, Shape *) )
 }
 
 inline int
-touch_two_shapes(Shape *s1, Shape *s2)
-{
-	if ( !same_space(s1, s2) ) {
-		return 0;
-	}
-	if ( s1 == s2 ) {
-		return 0;
-	}
-	else if (s1->type == 1 && s2->type == 1) {
-		int r = s1->as.circle.r + s2->as.circle.r;
-
-		return s1->p.distance( &(s1->p), &(s2->p) ) < r * r;
-	} 
-	else if (s1->type == 1 && s2->type == 2) {
-		return touch_c2b(s1, s2);
-	}
-	else if (s1->type == 2 && s2->type == 1) {
-		return touch_c2b(s2, s1);
-	}
-	else if (s1->type == 2 && s2->type == 2) {
-		Box *b1 = &(s1->as.box),
-			*b2 = &(s2->as.box);
-
-		return b1->apex[0].x < b2->apex[3].x &&
-			   b2->apex[0].x < b1->apex[3].x &&
-			   b2->apex[0].y < b1->apex[3].y &&
-			   b1->apex[0].y < b2->apex[3].y;
-	}
-	else {
-		return 0;
-	}
-}
-
-inline void
-break_shape (Shape *s)
-{
-	s->color = COLOR_BLACK;
-
-	s->prev->next = s->next;
-	s->next->prev = s->prev;
-
-	s->next = NULL;
-	s->prev = NULL;
-
-	s->draw(s);
-	s->erase(s);
-}
-
-int
-touch_shapes (Shape *s)
-{
-	Shape *n;
-
-	n = run_two_side_list(s, touch_two_shapes);
-
-	if (n != NULL) {
-		if ( s->touch_callback != NULL && s->touch_callback(s, n) ) {
-			return 0;
-		}
-
-		if (n->touch_callback != NULL) {
-			n->touch_callback(n, s);
-		}
-
-		if (s->breakable) {
-			break_shape(s);
-		}
-
-		if (n->breakable) {
-			break_shape(n);
-		}
-
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-inline int
 move_shape (Shape *s, int x, int y)
 {
 	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
@@ -245,7 +123,7 @@ move_shape (Shape *s, int x, int y)
 			s->move_callback(s, 1);
 		}
 
-		//s->update_mn(s);
+		s->update_mn(s);
 
 		return 1;
 	} else {
@@ -255,6 +133,35 @@ move_shape (Shape *s, int x, int y)
 
 		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
 
+		return 0;
+	}
+}
+
+inline int
+direct_move (Shape *s, int x, int y)
+{
+	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
+	if ( !s->in_screen(s) ) {
+		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+		return 0;
+	}
+	s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+
+	if ( (s->type == 2 ? move_touch_test_of_box(s, x, y) : move_touch_test_of_circle(s, x, y)) ) {
+		s->p.set( &(s->p), s->p.x + x, s->p.y + y );
+
+		if (s->type == 2) {
+			s->as.box.update_apex(s);
+		}
+
+		if (s->move_callback != NULL) {
+			s->move_callback(s, 1);
+		}
+
+		s->update_mn(s);
+
+		return 1;
+	} else {
 		return 0;
 	}
 }
@@ -335,6 +242,10 @@ shape_run_body (Shape *s)
 	s->v.up_v( &(s->v), s->v.ax, s->v.ay );
 	s->pre_p.set( &(s->pre_p), s->p.x, s->p.y );
 
+	//if ( s->direct_move(s, s->v.dx, s->v.dy) ) {
+	//	return;
+	//}
+
 	x  = abs(s->v.dx);
 	y  = abs(s->v.dy);
 
@@ -351,7 +262,6 @@ shape_run_body (Shape *s)
 
 	if (x == 0) {
 		d = ( s->v.dy < 0 ? -1 : 1 ); 
-
 		for (i = 0; i < y; i++) {
 			if ( !s->move(s, 0, d) ) {
 				s->v.reflect_y( &(s->v) );
@@ -378,7 +288,8 @@ shape_run_body (Shape *s)
 				dl *= -1 * s->v.reflectable;
 			}
 
-			k = (m-- > 0 ? 0 : 1);
+			k = (m > 0 ? 0 : 1);
+			m--;
 			for (j = 0; j < (p + k); j++) {
 				if ( !s->move(s, dg * xb, dg * yb) ) {
 					fg( &(s->v) );
