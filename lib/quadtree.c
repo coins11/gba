@@ -53,11 +53,6 @@ mn_index (int x1, int y1, int x2, int y2)
 
 	for (i = 0; (sm >> (i * 2)) != 0; i++);
 
-	//vbaPrint("-------1-------\n");
-	//vbaIntPrint(ul);
-	//vbaIntPrint(br);
-	//vbaIntPrint(sm);
-	//vbaPrint("-------2-------\n");
 	if (sm == 0) {
 		return (int)(ul) + l[0]; 
 	} else if (i < 4) {
@@ -145,4 +140,3 @@ same_space (Shape *s1, Shape *s2)
 {
 	return same_space_int(s1->mn, s2->mn);
 }
-

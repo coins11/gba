@@ -44,3 +44,22 @@ on_area_border (int x, int y)
 	return on_side_area_border(x) || on_updown_area_border(y);
 }
 
+inline int
+x_overfull (int x)
+{
+	if ( on_side_area_border(x) ) {
+		return 0;
+	} else {
+		return (x < 0 ? x : x - LCD_WIDTH);
+	}
+}
+
+inline int
+y_overfull (int y)
+{
+	if ( on_updown_area_border(y) ) {
+		return 0;
+	} else {
+		return (y < 0 ? y : y - LCD_WIDTH);
+	}
+}

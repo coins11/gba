@@ -146,6 +146,26 @@ direct_move (Shape *s, int x, int y)
 		return 0;
 	}
 	s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+	
+	//int ox, oy;
+	//s->p.set( &(s->p), s->p.x + x, s->p.y + y );
+	//while (!s->in_screen(s)) {
+	//	s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+
+	//	ox = x_overfull(s->p.x + x);
+	//	oy = y_overfull(s->p.y - y);
+
+	//	x -= ox;
+	//	y -= oy;
+	//	if ( !(s->type == 2 ? move_touch_test_of_box(s, x, y) : move_touch_test_of_circle(s, x, y)) ) {
+	//		return 0;
+	//	}
+
+	//	x = ox;
+	//	y = oy;
+
+	//	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
+	//}
 
 	if ( (s->type == 2 ? move_touch_test_of_box(s, x, y) : move_touch_test_of_circle(s, x, y)) ) {
 		s->p.set( &(s->p), s->p.x + x, s->p.y + y );
@@ -242,9 +262,9 @@ shape_run_body (Shape *s)
 	s->v.up_v( &(s->v), s->v.ax, s->v.ay );
 	s->pre_p.set( &(s->pre_p), s->p.x, s->p.y );
 
-	//if ( s->direct_move(s, s->v.dx, s->v.dy) ) {
-	//	return;
-	//}
+	if ( s->direct_move(s, s->v.dx, s->v.dy) ) {
+		return;
+	}
 
 	x  = abs(s->v.dx);
 	y  = abs(s->v.dy);
@@ -282,14 +302,13 @@ shape_run_body (Shape *s)
 		p  = ( xb ? Div(x, y) : Div(y, x) );
 		m  = ( xb ? DivMod(x, y) : DivMod(y, x) );
 
-		for (i = 0; i < n; i++) {
+		for (i = 0; i < n; i++, m--) {
 			if ( !s->move(s, dl * !xb, dl * !yb) ) {
 				fl( &(s->v) );
 				dl *= -1 * s->v.reflectable;
 			}
 
-			k = (m > 0 ? 0 : 1);
-			m--;
+			k = (m > 0 ? 1 : 0);
 			for (j = 0; j < (p + k); j++) {
 				if ( !s->move(s, dg * xb, dg * yb) ) {
 					fg( &(s->v) );

@@ -9,6 +9,7 @@
 #include "lib/print.h"
 #include "lib/libgba/gba_systemcalls.h"
 #include "lib/debug.h"
+#include <string.h>
 
 #define COLOR_WHITE     BGR(31, 31, 31)
 #define COLOR_BLUE      BGR(0, 0, 31)
@@ -67,11 +68,9 @@ init_circles (Shape *c, int l, int r, int x, int y) {
 		c[i].as.circle.set( &c[i], x + 20 * i, y, r );
 
 		if (i == 0) {
-			c[i].id    = 0xFF;
 			c[i].color = COLOR_WHITE;
 			c[i].v.set_v(&(c[i].v), 1, 1);
 		} else {
-			c[i].id    = 0xFE;
 			c[i].color = COLOR_RED;
 			c[i].v.set_v(&(c[i].v), -1, -1);
 		}
@@ -83,13 +82,14 @@ init_circles (Shape *c, int l, int r, int x, int y) {
 }
 
 inline void
-init_blocks (Shape *b, int l, int s, int x, int y, int w, int h) {
+init_blocks (Shape *b, int l, int s, int x, int y, int w, int h)
+{
 	for (int i = s; i < l; i++) {
 		new_Box(&b[i]);
 		b[i].id    = BLOCK_ID;
 		b[i].color = COLOR_RED;
 		b[i].as.box.set(&b[i], (x + (i - s) * x), y, w, h);
-		b[i].v.set_v(&(b[i].v), DivMod(i, 2), DivMod(i, 3));
+		b[i].v.set_v(&(b[i].v), (DivMod(i, 2) ? 1 : -1), (DivMod(i, 2) ? -1 : 1));
 		b[i].v.set_a(&(b[i].v), 0, 0);
 		b[i].breakable = 1;
 		b[i].touch_callback = pierce_block;
@@ -119,11 +119,21 @@ move_racket (Shape *r, int key) {
 
 inline void
 init (Shape *c, Shape *b, Shape *r) {
-	init_circles(c, 2, 3, 70, 70);
-	init_blocks(b, 10, 0, 20, 10, 3, 3);
-	init_blocks(b, 20, 10, 20, 80, 3, 3);
+	init_circles(c, 2, 5, 70, 70);
+	init_blocks(b, 10, 0, 20, 10, 5, 5);
+	init_blocks(b, 20, 10, 20, 80, 5, 5);
 
-	chain_shapes(3, &c[0], &c[1],/* &b[0], &b[1], &b[2], &b[3], &b[4], &b[5], &b[6], &b[7], &b[8], &b[9], /*&b[10], &b[11], &b[12], &b[13], &b[14], &b[15], &b[16], &b[17], &b[18], &b[19],*/ r );
+	chain_shapes(22, &b[0], &b[1], &b[2], &b[3], &b[4], &b[5], &b[6], &b[7], &b[8], &b[9], &b[10], &b[11], &b[12], &b[13], &b[14], &b[15], &b[16], &b[17], &b[18], &b[19], &c[0], r );
+}
+
+inline int
+set_frame_rate (int rate, int key)
+{
+	if (! (key & KEY_UP)) {
+		return key + 100;
+	} else if (! (key & KEY_DOWN)) {
+		return key - 100;
+	}
 }
 
 int
@@ -133,7 +143,7 @@ main () {
 	Shape c[2];
 	Shape b[20];
 	Shape r;
-	int i, key;
+	int i, key, rate = 1300;
 
 	STATE = START;
 	gba_register(LCD_CTRL) = LCD_BG2EN | LCD_MODE3;
@@ -148,7 +158,7 @@ main () {
 	r.v.set_v(&(r.v), 0, 0);
 	r.v.set_a(&(r.v), 0, 0);
 	r.v.reflectable  = 0;
-	//r.touch_callback = shrink_racket;
+	r.touch_callback = shrink_racket;
 
 	wait_until_vblank();
 	r.draw_all(&r);
@@ -196,11 +206,17 @@ main () {
 			case RUN:
 				move_racket(&r, key);
 
-				if (r.run(&r) == 3) {
-					//STATE = CLEAR;
+				if (r.run(&r) == 2) {
+					STATE = CLEAR;
 				}
 
-				wait_until(begin + 500);
+				//for (i = 0; i <= 20; i++) {
+				//	memset((fb + 10 + i * LCD_WIDTH), COLOR_BLACK, 128*2);
+				//}
+				//draw_int(c[0].p.x, 10, 0, COLOR_WHITE);
+				//draw_int(c[0].p.y, 10, 10, COLOR_WHITE);
+
+				wait_until(begin + rate);
 
 				wait_until_vblank();
 				r.redraw_all(&r);

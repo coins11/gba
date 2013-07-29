@@ -50,7 +50,7 @@ touch_c2b (Shape *c, Shape *b)
 	return 0;
 }
 
-static inline int
+inline int
 touch_two_shapes(Shape *s1, Shape *s2)
 {
 	if ( s1 == s2 || !s1->same_space(s1, s2) ) {
@@ -169,7 +169,6 @@ move_touch_test_of_box (Shape *s, int x, int y)
 		return 0;
 	}
 }
-
 
 inline int
 move_touch_test_of_circle (Shape *s, int x, int y)
