@@ -73,19 +73,18 @@ extern inline void new_Shape (Shape *);
 
 extern void chain_shapes (int, ...);
 
-extern inline int  move_shape (Shape *, int, int);
-extern inline int  direct_move (Shape *, int, int);
-extern inline void erase_shape (Shape *);
-extern inline void redraw_shape (Shape *);
+static inline int  move_shape (Shape *, int, int);
+static inline int  direct_move (Shape *, int, int);
+static inline void erase_shape (Shape *);
+static inline void redraw_shape (Shape *);
 
-extern inline void draw_all_shapes (Shape *);
-extern inline void erase_all_shapes (Shape *);
-extern inline void redraw_all_shapes (Shape *);
+static inline void draw_all_shapes (Shape *);
+static inline void erase_all_shapes (Shape *);
+static inline void redraw_all_shapes (Shape *);
 
 extern inline Shape * run_two_side_list (Shape *, int (*)(Shape *, Shape *));
 
-extern int shape_run (Shape *);
-extern inline void break_shape (Shape *);
-extern int touch_shapes (Shape *);
+static int shape_run (Shape *);
+static inline void break_shape (Shape *);
 
 #endif

@@ -79,6 +79,68 @@ circle_mn (Shape *s)
 }
 
 
+inline int
+get_move_box_mn (Shape *s, int x, int y)
+{
+	int x1, y1, x2, y2;
+	Box *b = &(s->as.box);
+
+	if (x < 0 && y < 0) {
+		x1 = b->apex[0].x + x;
+		y1 = b->apex[0].y + y;
+		x2 = b->apex[3].x;
+		y2 = b->apex[3].y;
+	} else if (x >= 0 && y >= 0) {
+		x1 = b->apex[0].x;
+		y1 = b->apex[0].y;
+		x2 = b->apex[3].x + x;
+		y2 = b->apex[3].y + y;
+	} else if (y < 0) {
+		x1 = b->apex[2].x;
+		y1 = b->apex[2].y;
+		x2 = b->apex[1].x + x;
+		y2 = b->apex[1].y + y;
+	} else {
+		x1 = b->apex[1].x;
+		y1 = b->apex[1].y;
+		x2 = b->apex[2].x + x;
+		y2 = b->apex[2].y + y;
+	}
+	
+	return mn_index(x1, y1, x2, y2);
+}
+
+inline int
+get_move_circle_mn (Shape *s, int x, int y)
+{
+	int x1, y1, x2, y2;
+	Circle *c = &(s->as.circle);
+
+	if (x < 0 && y < 0) {
+		x1 = s->p.x - c->r + x;
+		y1 = s->p.y - c->r + y;
+		x2 = s->p.x;
+		y2 = s->p.y;
+	} else if (x >= 0 && y >= 0) {
+		x1 = s->p.x - c->r;
+		y1 = s->p.y - c->r;
+		x2 = s->p.x + c->r + x;
+		y2 = s->p.y + c->r + y;
+	} else if (y < 0) {
+		x1 = s->p.x - c->r;
+		y1 = s->p.y - c->r;
+		x2 = s->p.x + c->r + x;
+		y2 = s->p.y + c->r + y;
+	} else {
+		x1 = s->p.x + c->r;
+		y1 = s->p.y + c->r;
+		x2 = s->p.x - c->r + x;
+		y2 = s->p.y - c->r + y;
+	}
+
+	return mn_index(x1, y1, x2, y2);
+}
+
 inline void
 update_mn (Shape *s)
 {

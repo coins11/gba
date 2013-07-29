@@ -55,9 +55,8 @@ accelerate_racket (Shape *ball, Shape *block) {
 
 inline int
 pierce_block (Shape *b1, Shape *b2) {
-	return (b2->id == BLOCK_ID);
+	return (b2->id == BLOCK_ID) || (b2->id == BALL_ID);
 }
-
 
 inline void
 init_circles (Shape *c, int l, int r, int x, int y) {
@@ -69,7 +68,7 @@ init_circles (Shape *c, int l, int r, int x, int y) {
 
 		if (i == 0) {
 			c[i].color = COLOR_WHITE;
-			c[i].v.set_v(&(c[i].v), 3, 3);
+			c[i].v.set_v(&(c[i].v), 2, 2);
 		} else {
 			c[i].color = COLOR_RED;
 			c[i].v.set_v(&(c[i].v), -1, -1);
@@ -119,21 +118,11 @@ move_racket (Shape *r, int key) {
 
 inline void
 init (Shape *c, Shape *b, Shape *r) {
-	init_circles(c, 2, 5, 70, 70);
+	init_circles(c, 2, 3, 70, 70);
 	init_blocks(b, 10, 0, 20, 10, 5, 5);
-	init_blocks(b, 20, 10, 20, 80, 5, 5);
+	init_blocks(b, 20, 10, 20, 30, 5, 5);
 
 	chain_shapes(22, &b[0], &b[1], &b[2], &b[3], &b[4], &b[5], &b[6], &b[7], &b[8], &b[9], &b[10], &b[11], &b[12], &b[13], &b[14], &b[15], &b[16], &b[17], &b[18], &b[19], &c[0], r );
-}
-
-inline int
-set_frame_rate (int rate, int key)
-{
-	if (! (key & KEY_UP)) {
-		return key + 100;
-	} else if (! (key & KEY_DOWN)) {
-		return key - 100;
-	}
 }
 
 int
@@ -143,10 +132,10 @@ main () {
 	Shape c[2];
 	Shape b[20];
 	Shape r;
-	int i, key, rate = 1300;
+	int i, key;
 
 	STATE = START;
-	gba_register(LCD_CTRL) = LCD_BG2EN | LCD_MODE3;
+	gba_register(LCD_CTRL)   = LCD_BG2EN | LCD_MODE3;
 	delay_init();
 
 	init(c, b, &r);
@@ -177,19 +166,32 @@ main () {
 			case DIE:
 				wait_until_vblank();
 				draw_str("DEAD", 50, 10, COLOR_WHITE);
-				delay(9000);
-				draw_str("DEAD", 50, 10, COLOR_BLACK);
 				wait_while_vblank();
 
-				STATE = RESTART;
+				if (! (key & KEY_START)) {
+					STATE = RESTART;
+				} else {
+					break;
+				}
+
+				wait_until_vblank();
+				draw_str("DEAD", 50, 10, COLOR_BLACK);
+				wait_while_vblank();
 				break;
 			case CLEAR:
 				wait_until_vblank();
 				draw_str("CLEAR", 50, 10, COLOR_WHITE);
-				delay(9000);
-				draw_str("CLEAR", 50, 10, COLOR_BLACK);
+				wait_while_vblank();
 
-				STATE = RESTART;
+				if (! (key & KEY_START)) {
+					STATE = RESTART;
+				} else {
+					break;
+				}
+
+				wait_until_vblank();
+				draw_str("CLEAR", 50, 10, COLOR_BLACK);
+				wait_while_vblank();
 				break;
 			case RESTART:
 				init(c, b, &r);
@@ -216,11 +218,11 @@ main () {
 				//draw_int(c[0].p.x, 10, 0, COLOR_WHITE);
 				//draw_int(c[0].p.y, 10, 10, COLOR_WHITE);
 
-				wait_until(begin + rate);
-
 				wait_until_vblank();
 				r.redraw_all(&r);
 				wait_while_vblank();
+
+				wait_until(begin + 20000);
 				break;
 		}
 	}

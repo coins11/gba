@@ -4,7 +4,7 @@
 static inline void
 delay_init (void) {
 	gba_register(TMR_COUNT0) = 0;
-	gba_register(TMR_CTRL0)  = TMR_ENABLE + TMR_1024CLOCK;
+	gba_register(TMR_CTRL0)  = TMR_ENABLE + TMR_64CLOCK;
 }
 
 static inline void

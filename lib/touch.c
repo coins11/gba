@@ -127,35 +127,42 @@ touch_shapes (Shape *s)
 }
 
 inline int
+touch_shapes_of_list (Shape *s, Shape **l)
+{
+	int i;
+
+	for (i = 0; l[i] != NULL; i++) {
+		if ( touch_two_shapes(s, l[i]) ) {
+			if ( s->touch_callback != NULL && s->touch_callback(s, l[i]) ) {
+				continue;
+			}
+
+			if (l[i]->touch_callback != NULL) {
+				l[i]->touch_callback(l[i], s);
+			}
+
+			if (s->breakable) {
+				break_shape(s);
+			}
+
+			if (l[i]->breakable) {
+				break_shape(l[i]);
+			}
+
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+inline int
 move_touch_test_of_box (Shape *s, int x, int y)
 {
 	Box *b     = &(s->as.box);
 	int old_mn = s->mn;
-	int x1, y1, x2, y2;
-
-	if (x < 0 && y < 0) {
-		x1 = b->apex[0].x + x;
-		y1 = b->apex[0].y + y;
-		x2 = b->apex[3].x;
-		y2 = b->apex[3].y;
-	} else if (x >= 0 && y >= 0) {
-		x1 = b->apex[0].x;
-		y1 = b->apex[0].y;
-		x2 = b->apex[3].x + x;
-		y2 = b->apex[3].y + y;
-	} else if (y < 0) {
-		x1 = b->apex[2].x;
-		y1 = b->apex[2].y;
-		x2 = b->apex[1].x + x;
-		y2 = b->apex[1].y + y;
-	} else {
-		x1 = b->apex[1].x;
-		y1 = b->apex[1].y;
-		x2 = b->apex[2].x + x;
-		y2 = b->apex[2].y + y;
-	}
-
-	s->mn = mn_index(x1, y1, x2, y2);
+	
+	s->mn = get_move_box_mn(s, x, y);
 
 	inline int f (Shape *s1, Shape *s2) {
 		return s1 != s2 && s1->same_space(s1, s2);
@@ -170,36 +177,14 @@ move_touch_test_of_box (Shape *s, int x, int y)
 	}
 }
 
+
 inline int
 move_touch_test_of_circle (Shape *s, int x, int y)
 {
 	Circle *c  = &(s->as.circle);
 	int old_mn = s->mn;
-	int x1, y1, x2, y2;
 
-	if (x < 0 && y < 0) {
-		x1 = s->p.x - c->r + x;
-		y1 = s->p.y - c->r + y;
-		x2 = s->p.x;
-		y2 = s->p.y;
-	} else if (x >= 0 && y >= 0) {
-		x1 = s->p.x - c->r;
-		y1 = s->p.y - c->r;
-		x2 = s->p.x + c->r + x;
-		y2 = s->p.y + c->r + y;
-	} else if (y < 0) {
-		x1 = s->p.x - c->r;
-		y1 = s->p.y - c->r;
-		x2 = s->p.x + c->r + x;
-		y2 = s->p.y + c->r + y;
-	} else {
-		x1 = s->p.x + c->r;
-		y1 = s->p.y + c->r;
-		x2 = s->p.x - c->r + x;
-		y2 = s->p.y - c->r + y;
-	}
-
-	s->mn = mn_index(x1, y1, x2, y2);
+	s->mn = get_move_circle_mn(s, x, y);;
 
 	int f (Shape *s1, Shape *s2) {
 		return s1 != s2 && s1->same_space(s1, s2);

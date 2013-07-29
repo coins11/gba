@@ -47,7 +47,7 @@ new_Shape (Shape *s)
 	s->same_space = same_space;
 }
 
-void
+inline void
 chain_shapes (int n, ...)
 {
 	int i;
@@ -109,21 +109,30 @@ run_two_side_list (Shape *s, int (*f)(Shape *, Shape *) )
 	}
 }
 
-inline int
+
+static inline void
+move_shape_without_check (Shape *s, int x, int y)
+{
+	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
+	
+	if (s->type == 2) {
+		s->as.box.update_apex(s);
+	}
+
+	if (s->move_callback != NULL) {
+		s->move_callback(s, 1);
+	}
+
+	s->update_mn(s);
+}
+
+static inline int
 move_shape (Shape *s, int x, int y)
 {
 	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
 	
 	if ( s->in_screen(s) && !s->touch(s) ) {
-		if (s->type == 2) {
-			s->as.box.update_apex(s);
-		}
-
-		if (s->move_callback != NULL) {
-			s->move_callback(s, 1);
-		}
-
-		s->update_mn(s);
+		move_shape_without_check(s, x, y);
 
 		return 1;
 	} else {
@@ -137,7 +146,43 @@ move_shape (Shape *s, int x, int y)
 	}
 }
 
-inline int
+
+static inline int
+in_screen_after_move (Shape *s, int x, int y)
+{
+	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
+	
+	if ( s->in_screen(s) ) {
+		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+		return 1;
+	} else { 
+		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+		return 0;
+	}
+}
+
+static inline int
+move_if_in_screen (Shape *s, int x, int y, Shape **l)
+{
+	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
+
+	if ( !touch_shapes_of_list(s, l) ) {
+		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+
+		move_shape_without_check(s, x, y);
+		return 1;
+	} else {
+		if (s->move_callback != NULL) {
+			s->move_callback(s, 0);
+		}
+
+		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
+
+		return 0;
+	}
+}
+
+static inline int
 direct_move (Shape *s, int x, int y)
 {
 	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
@@ -147,26 +192,6 @@ direct_move (Shape *s, int x, int y)
 	}
 	s->p.set( &(s->p), s->p.x - x, s->p.y - y );
 	
-	//int ox, oy;
-	//s->p.set( &(s->p), s->p.x + x, s->p.y + y );
-	//while (!s->in_screen(s)) {
-	//	s->p.set( &(s->p), s->p.x - x, s->p.y - y );
-
-	//	ox = x_overfull(s->p.x + x);
-	//	oy = y_overfull(s->p.y - y);
-
-	//	x -= ox;
-	//	y -= oy;
-	//	if ( !(s->type == 2 ? move_touch_test_of_box(s, x, y) : move_touch_test_of_circle(s, x, y)) ) {
-	//		return 0;
-	//	}
-
-	//	x = ox;
-	//	y = oy;
-
-	//	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
-	//}
-
 	if ( (s->type == 2 ? move_touch_test_of_box(s, x, y) : move_touch_test_of_circle(s, x, y)) ) {
 		s->p.set( &(s->p), s->p.x + x, s->p.y + y );
 
@@ -186,7 +211,7 @@ direct_move (Shape *s, int x, int y)
 	}
 }
 
-inline void
+static inline void
 erase_shape (Shape *s)
 {
 	hword c = s->color;
@@ -203,7 +228,7 @@ erase_shape (Shape *s)
 	s->p.y   = y;
 }
 
-inline void
+static inline void
 redraw_shape (Shape *s)
 {
 	if ( s->p.x != s->pre_p.x || s->p.y != s->pre_p.y  ) {
@@ -212,7 +237,7 @@ redraw_shape (Shape *s)
 	}
 }
 
-inline void
+static inline void
 draw_all_shapes (Shape *s)
 {
 	inline int f (Shape *s1, Shape *s2) {
@@ -223,7 +248,7 @@ draw_all_shapes (Shape *s)
 	run_two_side_list(s, f);
 }
 
-inline void
+static inline void
 erase_all_shapes (Shape *s)
 {
 	inline int f (Shape *s1, Shape *s2) {
@@ -234,7 +259,7 @@ erase_all_shapes (Shape *s)
 	run_two_side_list(s, f);
 }
 
-inline void
+static inline void
 redraw_all_shapes (Shape *s)
 {
 	inline int f (Shape *s1, Shape *s2) {
@@ -251,11 +276,15 @@ abs (int n)
 	return (n < 0 ? n * -1 : n);
 }
 
-void
+static inline void
 shape_run_body (Shape *s)
 {
 	int i, j, x, y, p, m, n;
 	int k, d, dg, dl, xb, yb;
+	int old_mn = s->mn;
+	int in_screen_am;
+	Shape *next;
+	Shape *l[40];
 	void (*fg)(Velocity *);
 	void (*fl)(Velocity *);
 
@@ -264,6 +293,24 @@ shape_run_body (Shape *s)
 
 	if ( s->direct_move(s, s->v.dx, s->v.dy) ) {
 		return;
+	}
+
+	in_screen_am = in_screen_after_move(s, s->v.dx, s->v.dy);
+	if ( in_screen_am ) {
+		if (s->type == 2) {
+			s->mn = get_move_box_mn(s, s->v.dx, s->v.dy);
+		} else {
+			s->mn = get_move_circle_mn(s, s->v.dx, s->v.dy);
+		}
+
+		i = 0;
+		for (next = s->next; next != s; next = next->next) {
+			if (s->same_space(s, next)) {
+				l[i++] = next;
+			}
+		}
+		s->mn = old_mn;
+		l[i] = NULL;
 	}
 
 	x  = abs(s->v.dx);
@@ -283,7 +330,7 @@ shape_run_body (Shape *s)
 	if (x == 0) {
 		d = ( s->v.dy < 0 ? -1 : 1 ); 
 		for (i = 0; i < y; i++) {
-			if ( !s->move(s, 0, d) ) {
+			if ( ! (in_screen_am ? move_if_in_screen(s, 0, d, l) : s->move(s, 0, d)) ) {
 				s->v.reflect_y( &(s->v) );
 				d *= -1 * s->v.reflectable;
 			}
@@ -292,25 +339,25 @@ shape_run_body (Shape *s)
 	else if (y == 0) {
 		d = ( s->v.dx < 0 ? -1 : 1 );
 		for (i = 0; i < x; i++) {
-			if ( !s->move(s, d, 0) ) {
+			if ( ! (in_screen_am ? move_if_in_screen(s, d, 0, l) : s->move(s, d, 0)) ) {
 				s->v.reflect_x( &(s->v) );
 				d *= -1 * s->v.reflectable;
 			}
 		}
 	}
 	else {
-		p  = ( xb ? Div(x, y) : Div(y, x) );
+		p  = ( xb ? Div(x, y)    : Div(y, x) );
 		m  = ( xb ? DivMod(x, y) : DivMod(y, x) );
 
 		for (i = 0; i < n; i++, m--) {
-			if ( !s->move(s, dl * !xb, dl * !yb) ) {
+			if ( ! (in_screen_am ? move_if_in_screen(s, dl * !xb, dl * !yb, l) : s->move(s, dl * !xb, dl * !yb)) ) {
 				fl( &(s->v) );
 				dl *= -1 * s->v.reflectable;
 			}
 
 			k = (m > 0 ? 1 : 0);
 			for (j = 0; j < (p + k); j++) {
-				if ( !s->move(s, dg * xb, dg * yb) ) {
+				if ( ! (in_screen_am ? move_if_in_screen(s, dg * xb, dg * yb, l) : s->move(s, dg * xb, dg * yb)) ) {
 					fg( &(s->v) );
 					dg *= -1 * s->v.reflectable;
 				}
@@ -319,7 +366,7 @@ shape_run_body (Shape *s)
 	}
 }
 
-int
+static int
 shape_run (Shape *s)
 {
 	int i = 1;
