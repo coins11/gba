@@ -69,7 +69,7 @@ init_circles (Shape *c, int l, int r, int x, int y) {
 
 		if (i == 0) {
 			c[i].color = COLOR_WHITE;
-			c[i].v.set_v(&(c[i].v), 1, 1);
+			c[i].v.set_v(&(c[i].v), 3, 3);
 		} else {
 			c[i].color = COLOR_RED;
 			c[i].v.set_v(&(c[i].v), -1, -1);
