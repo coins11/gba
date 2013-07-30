@@ -88,6 +88,7 @@ break_shape (Shape *s)
 
 	s->prev->next = s->next;
 	s->next->prev = s->prev;
+	s->breakable  = -1;
 
 	s->next = NULL;
 	s->prev = NULL;
@@ -132,7 +133,7 @@ touch_shapes_of_list (Shape *s, Shape **l)
 	int i;
 
 	for (i = 0; l[i] != NULL; i++) {
-		if ( touch_two_shapes(s, l[i]) ) {
+		if ( touch_two_shapes(s, l[i]) && l[i]->breakable != -1 ) {
 			if ( s->touch_callback != NULL && s->touch_callback(s, l[i]) ) {
 				continue;
 			}

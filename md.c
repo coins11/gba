@@ -100,19 +100,17 @@ init_blocks (Shape *b, int l, int s, int x, int y, int w, int h)
 inline void
 move_racket (Shape *r, int key) {
 	if (! (key & KEY_L)) {
-		r->v.up_a(&(r->v), -2, 0);
-	} else if (! (key & KEY_R)) {
-		r->v.up_a(&(r->v), 2,  0);
-	} else {
-		r->v.down_a(&(r->v), 2, 0);
-	}
-
-	if (! (key & KEY_LEFT)) {
 		r->v.up_v(&(r->v), -2, 0);
-	} else if (! (key & KEY_RIGHT)) {
+	} else if (! (key & KEY_R)) {
 		r->v.up_v(&(r->v), 2,  0);
 	} else {
 		r->v.down_v(&(r->v), 2, 0);
+	}
+
+	if (! (key & KEY_LEFT)) {
+		r->v.set_v(&(r->v), -2, 0);
+	} else if (! (key & KEY_RIGHT)) {
+		r->v.set_v(&(r->v), 2,  0);
 	}
 }
 
@@ -143,7 +141,7 @@ main () {
 	Shape c[2];
 	Shape b[20];
 	Shape r;
-	int i, key;
+	int i, key, particle;
 
 	STATE = START;
 	gba_register(LCD_CTRL)   = LCD_BG2EN | LCD_MODE3;
@@ -178,7 +176,7 @@ main () {
 				break;
 			case DIE:
 				wait_until_vblank();
-				draw_str("DEAD", 50, 10, COLOR_WHITE);
+				draw_str("DEAD", 100, 100, COLOR_WHITE);
 				wait_while_vblank();
 
 				if (! (key & KEY_START)) {
@@ -188,12 +186,12 @@ main () {
 				}
 
 				wait_until_vblank();
-				draw_str("DEAD", 50, 10, COLOR_BLACK);
+				draw_str("DEAD", 100, 100, COLOR_BLACK);
 				wait_while_vblank();
 				break;
 			case CLEAR:
 				wait_until_vblank();
-				draw_str("CLEAR", 50, 10, COLOR_WHITE);
+				draw_str("CLEAR", 100, 100, COLOR_WHITE);
 				wait_while_vblank();
 
 				if (! (key & KEY_START)) {
@@ -203,15 +201,19 @@ main () {
 				}
 
 				wait_until_vblank();
-				draw_str("CLEAR", 50, 10, COLOR_BLACK);
+				draw_str("CLEAR", 100, 100, COLOR_BLACK);
 				wait_while_vblank();
 				break;
 			case RESTART:
+				wait_until_vblank();
+				r.clear_all(&r);
+				wait_while_vblank();
+
 				init(c, b, &r);
-				r.as.box.set(&r, 120, 150, 40, 5);
+
+				r.as.box.set(&r, 100, 150, 40, 5);
 
 				wait_until_vblank();
-				r.erase_all(&r);
 				r.draw_all(&r);
 				r.update_mn_all(&r);
 				wait_while_vblank();
@@ -221,23 +223,21 @@ main () {
 				STATE = START;
 				break;
 			case RUN:
+				if (! (key & KEY_A) && ! (key & KEY_B)) {
+					STATE = RESTART;
+				} 
 				move_racket(&r, key);
 
-				if (r.run(&r) <= 2) {
+				particle = r.run(&r);
+				if (particle <= 2) {
 					STATE = CLEAR;
 				}
-
-				//for (i = 0; i <= 20; i++) {
-				//	memset((fb + 10 + i * LCD_WIDTH), COLOR_BLACK, 128*2);
-				//}
-				//draw_int(c[0].p.x, 10, 0, COLOR_WHITE);
-				//draw_int(c[0].p.y, 10, 10, COLOR_WHITE);
 
 				wait_until_vblank();
 				r.redraw_all(&r);
 				wait_while_vblank();
 
-				wait_until(begin + 20000);
+				wait_until(begin + 10000 + (particle - 2) * 500);
 				break;
 		}
 	}

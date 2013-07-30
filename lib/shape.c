@@ -22,7 +22,6 @@ new_Shape (Shape *s)
 	s->breakable = 0;
 	s->mn        = 0;
 
-
 	s->move_callback  = NULL;
 	s->touch_callback = NULL;
 
@@ -31,10 +30,12 @@ new_Shape (Shape *s)
 	s->move        = move_shape;
 	s->direct_move = direct_move;
 	s->erase       = erase_shape;
+	s->clear       = clear_shape;
 	s->redraw      = redraw_shape;
 
 	s->draw_all   = draw_all_shapes;
 	s->erase_all  = erase_all_shapes;
+	s->clear_all  = clear_all_shapes;
 	s->redraw_all = redraw_all_shapes;
 
 	s->run   = shape_run;
@@ -131,7 +132,7 @@ move_shape (Shape *s, int x, int y)
 {
 	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
 	
-	if ( s->in_screen(s) && !s->touch(s) ) {
+	if ( s->in_screen(s) && !s->touch(s) && s->breakable != -1) {
 		move_shape_without_check(s, x, y);
 
 		return 1;
@@ -145,7 +146,6 @@ move_shape (Shape *s, int x, int y)
 		return 0;
 	}
 }
-
 
 static inline int
 in_screen_after_move (Shape *s, int x, int y)
@@ -166,7 +166,7 @@ move_if_in_screen (Shape *s, int x, int y, Shape **l)
 {
 	s->p.set( &(s->p), s->p.x + x, s->p.y + y );
 
-	if ( !touch_shapes_of_list(s, l) ) {
+	if ( !touch_shapes_of_list(s, l) && s->breakable != -1) {
 		s->p.set( &(s->p), s->p.x - x, s->p.y - y );
 
 		move_shape_without_check(s, x, y);
@@ -238,6 +238,16 @@ redraw_shape (Shape *s)
 }
 
 static inline void
+clear_shape (Shape *s)
+{
+	hword c = s->color;
+
+	s->color = COLOR_BLACK;
+	s->draw(s);
+	s->color = c;
+}
+
+static inline void
 draw_all_shapes (Shape *s)
 {
 	inline int f (Shape *s1, Shape *s2) {
@@ -253,6 +263,17 @@ erase_all_shapes (Shape *s)
 {
 	inline int f (Shape *s1, Shape *s2) {
 		s2->erase(s2);
+		return 0;
+	}
+
+	run_two_side_list(s, f);
+}
+
+static inline void
+clear_all_shapes (Shape *s)
+{
+	inline int f (Shape *s1, Shape *s2) {
+		s2->clear(s2);
 		return 0;
 	}
 
