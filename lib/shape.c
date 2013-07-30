@@ -346,13 +346,20 @@ shape_run_body (Shape *s)
 		}
 	}
 	else {
-		p  = ( xb ? Div(x, y)    : Div(y, x) );
-		m  = ( xb ? DivMod(x, y) : DivMod(y, x) );
+		p = ( xb ? Div(x, y)    : Div(y, x) );
+		m = ( xb ? DivMod(x, y) : DivMod(y, x) );
 
 		for (i = 0; i < n; i++, m--) {
 			if ( ! (in_screen_am ? move_if_in_screen(s, dl * !xb, dl * !yb, l) : s->move(s, dl * !xb, dl * !yb)) ) {
 				fl( &(s->v) );
 				dl *= -1 * s->v.reflectable;
+
+				if ( ! (in_screen_am ? move_if_in_screen(s, dl * !xb, dl * !yb, l) : s->move(s, dl * !xb, dl * !yb)) ) {
+					fl( &(s->v) );
+					dl *= -1 * s->v.reflectable;
+					fg( &(s->v) );
+					dg *= -1 * s->v.reflectable;
+				}
 			}
 
 			k = (m > 0 ? 1 : 0);
@@ -360,6 +367,13 @@ shape_run_body (Shape *s)
 				if ( ! (in_screen_am ? move_if_in_screen(s, dg * xb, dg * yb, l) : s->move(s, dg * xb, dg * yb)) ) {
 					fg( &(s->v) );
 					dg *= -1 * s->v.reflectable;
+
+					if ( ! (in_screen_am ? move_if_in_screen(s, dg * xb, dg * yb, l) : s->move(s, dg * xb, dg * yb)) ) {
+						fg( &(s->v) );
+						dg *= -1 * s->v.reflectable;
+						fl( &(s->v) );
+						dl *= -1 * s->v.reflectable;
+					}
 				}
 			}
 		}

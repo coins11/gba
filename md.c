@@ -87,7 +87,7 @@ init_blocks (Shape *b, int l, int s, int x, int y, int w, int h)
 		new_Box(&b[i]);
 		b[i].id    = BLOCK_ID;
 		b[i].color = COLOR_RED;
-		b[i].as.box.set(&b[i], (x + (i - s) * x), y, w, h);
+		b[i].as.box.set(&b[i], (x + (i - s) * 20), y, w, h);
 		b[i].v.set_v(&(b[i].v), (DivMod(i, 2) ? 1 : -1), (DivMod(i, 2) ? -1 : 1));
 		b[i].v.set_a(&(b[i].v), 0, 0);
 		b[i].breakable = 1;
@@ -117,10 +117,21 @@ move_racket (Shape *r, int key) {
 }
 
 inline void
+move_block (Shape *b, int l, int key) {
+	int i;
+	int s = !(key & KEY_SELECT);
+
+	for (i = 0; i < l; i++) {
+		b[i].v.dx = (!s ? 0 : (DivMod(i, 2) ? 1 : -1));
+		b[i].v.dy = (!s ? 0 : (DivMod(i, 2) ? -1 : 1));
+	}
+}
+
+inline void
 init (Shape *c, Shape *b, Shape *r) {
-	init_circles(c, 2, 3, 70, 70);
-	init_blocks(b, 10, 0, 20, 10, 5, 5);
-	init_blocks(b, 20, 10, 20, 30, 5, 5);
+	init_circles(c, 2, 4, 70, 70);
+	init_blocks(b, 10, 0, 25, 10, 5, 5);
+	init_blocks(b, 20, 10, 25, 30, 5, 5);
 
 	chain_shapes(22, &b[0], &b[1], &b[2], &b[3], &b[4], &b[5], &b[6], &b[7], &b[8], &b[9], &b[10], &b[11], &b[12], &b[13], &b[14], &b[15], &b[16], &b[17], &b[18], &b[19], &c[0], r );
 }
@@ -143,7 +154,7 @@ main () {
 	new_Box(&r);
 	r.id    = RACKET_ID;
 	r.color = COLOR_WHITE;
-	r.as.box.set(&r, 120, 150, 40, 5);
+	r.as.box.set(&r, 100, 150, 40, 5);
 	r.v.set_v(&(r.v), 0, 0);
 	r.v.set_a(&(r.v), 0, 0);
 	r.v.reflectable  = 0;
@@ -162,6 +173,8 @@ main () {
 				if (! (key & KEY_START)) {
 					STATE = RUN;
 				}
+				move_block(b, 20, key);
+
 				break;
 			case DIE:
 				wait_until_vblank();
@@ -203,12 +216,14 @@ main () {
 				r.update_mn_all(&r);
 				wait_while_vblank();
 
+				delay(60000);
+
 				STATE = START;
 				break;
 			case RUN:
 				move_racket(&r, key);
 
-				if (r.run(&r) == 2) {
+				if (r.run(&r) <= 2) {
 					STATE = CLEAR;
 				}
 
