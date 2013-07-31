@@ -356,7 +356,12 @@ shape_run_body (Shape *s)
 				d *= -1 * s->v.reflectable;
 			}
 		}
-	} 
+
+		if (s->breakable == -1) {
+			return;
+
+		} 
+	}
 	else if (y == 0) {
 		d = ( s->v.dx < 0 ? -1 : 1 );
 		for (i = 0; i < x; i++) {
@@ -364,6 +369,10 @@ shape_run_body (Shape *s)
 				s->v.reflect_x( &(s->v) );
 				d *= -1 * s->v.reflectable;
 			}
+		}
+
+		if (s->breakable == -1) {
+			return;
 		}
 	}
 	else {
@@ -397,6 +406,10 @@ shape_run_body (Shape *s)
 					}
 				}
 			}
+
+			if (s->breakable == -1) {
+				return;
+			}
 		}
 	}
 }
@@ -414,11 +427,11 @@ shape_run (Shape *s)
 	for (n = s->next; s != n && n != NULL; n = n->next) {
 		i++;
 
-		if (n->v.movable) {
+		if (n->v.movable && n->breakable != -1) {
 			shape_run_body(n);
 		}
 	}
-
+	
 	return i;
 }
 

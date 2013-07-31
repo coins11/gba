@@ -15,9 +15,9 @@ crt.o : crt.S
 	arm-none-eabi-objcopy -O binary $*.out $*.bin
 
 %.mb : %.bin
-	mv $< $*.mb
+	cp $< $*.mb
 	cp $*.mb ~/tmp/windows/VisualBoyAdvanceM1149/
 
 clean : 
-	rm *.bin *.o *.out *.mb
+	rm *.o *.out *.bin *.mb
 

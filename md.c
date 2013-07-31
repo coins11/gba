@@ -59,25 +59,18 @@ pierce_block (Shape *b1, Shape *b2) {
 }
 
 inline void
-init_circles (Shape *c, int l, int r, int x, int y) {
-	for (int i = 0; i < l; i++) {
-		new_Circle(&c[i]);
-		c[i].id    = BALL_ID;
-		c[i].color = COLOR_WHITE;
-		c[i].as.circle.set( &c[i], x + 20 * i, y, r );
+init_circles (Shape *c, int r, int x, int y, hword t) {
+	new_Circle(c);
+	c->id    = BALL_ID;
+	c->color = COLOR_WHITE;
+	c->as.circle.set( c, x, y, r );
 
-		if (i == 0) {
-			c[i].color = COLOR_WHITE;
-			c[i].v.set_v(&(c[i].v), 2, 2);
-		} else {
-			c[i].color = COLOR_RED;
-			c[i].v.set_v(&(c[i].v), -1, -1);
-		}
+	c->color = COLOR_WHITE;
+	c->v.set_v(&(c->v), (DivMod(t, 2) ? 2 : -2), (DivMod(t, 3) ? 2 : -2));
 
-		c[i].move_callback = die_on_bottom;
-		//c[i].touch_callback = accelerate_racket;
-		c[i].update_mn(&c[i]);
-	}
+	c->move_callback = die_on_bottom;
+	//c->touch_callback = accelerate_racket;
+	c->update_mn(c);
 }
 
 inline void
@@ -126,10 +119,12 @@ move_block (Shape *b, int l, int key) {
 }
 
 inline void
-init (Shape *c, Shape *b, Shape *r) {
-	init_circles(c, 2, 4, 70, 70);
+init (Shape *c, Shape *b, Shape *r, hword begin) {
+	init_circles(c, 4, DivMod(begin, 220) + 10, 70, begin);
 	init_blocks(b, 10, 0, 25, 10, 5, 5);
 	init_blocks(b, 20, 10, 25, 30, 5, 5);
+
+	r->as.box.set(r, 100, 150, 40, 5);
 
 	chain_shapes(22, &b[0], &b[1], &b[2], &b[3], &b[4], &b[5], &b[6], &b[7], &b[8], &b[9], &b[10], &b[11], &b[12], &b[13], &b[14], &b[15], &b[16], &b[17], &b[18], &b[19], &c[0], r );
 }
@@ -138,7 +133,7 @@ int
 main () {
 	hword *fb = (hword*)VRAM;
 	hword begin;
-	Shape c[2];
+	Shape c;
 	Shape b[20];
 	Shape r;
 	int i, key, particle;
@@ -147,20 +142,14 @@ main () {
 	gba_register(LCD_CTRL)   = LCD_BG2EN | LCD_MODE3;
 	delay_init();
 
-	init(c, b, &r);
-
 	new_Box(&r);
 	r.id    = RACKET_ID;
 	r.color = COLOR_WHITE;
-	r.as.box.set(&r, 100, 150, 40, 5);
 	r.v.set_v(&(r.v), 0, 0);
 	r.v.set_a(&(r.v), 0, 0);
 	r.v.reflectable  = 0;
 	r.touch_callback = shrink_racket;
 
-	wait_until_vblank();
-	r.draw_all(&r);
-	wait_while_vblank();
 	
 	while (1) {
 		key   = gba_register(KEY_STATUS);
@@ -168,7 +157,21 @@ main () {
 
 		switch (STATE) {
 			case START:
+				wait_until_vblank();
+				draw_str("Press START", 75, 100, COLOR_WHITE);
+				wait_while_vblank();
+
 				if (! (key & KEY_START)) {
+					wait_until_vblank();
+					draw_str("Press START", 75, 100, COLOR_BLACK);
+					wait_while_vblank();
+
+					init(&c, b, &r, begin);
+
+					wait_until_vblank();
+					r.draw_all(&r);
+					wait_while_vblank();
+
 					STATE = RUN;
 				}
 				move_block(b, 20, key);
@@ -207,15 +210,6 @@ main () {
 			case RESTART:
 				wait_until_vblank();
 				r.clear_all(&r);
-				wait_while_vblank();
-
-				init(c, b, &r);
-
-				r.as.box.set(&r, 100, 150, 40, 5);
-
-				wait_until_vblank();
-				r.draw_all(&r);
-				r.update_mn_all(&r);
 				wait_while_vblank();
 
 				delay(60000);

@@ -53,7 +53,7 @@ touch_c2b (Shape *c, Shape *b)
 inline int
 touch_two_shapes(Shape *s1, Shape *s2)
 {
-	if ( s1 == s2 || !s1->same_space(s1, s2) ) {
+	if ( s1 == s2 || !s1->same_space(s1, s2) || s2->breakable == -1) {
 		return 0;
 	}
 	else if (s1->type == 1 && s2->type == 1) {
@@ -84,17 +84,12 @@ touch_two_shapes(Shape *s1, Shape *s2)
 inline void
 break_shape (Shape *s)
 {
-	s->color = COLOR_BLACK;
-
 	s->prev->next = s->next;
 	s->next->prev = s->prev;
 	s->breakable  = -1;
 
-	s->next = NULL;
-	s->prev = NULL;
-
-	s->draw(s);
 	s->erase(s);
+	s->clear(s);
 }
 
 inline int
@@ -104,7 +99,7 @@ touch_shapes (Shape *s)
 
 	n = run_two_side_list(s, touch_two_shapes);
 
-	if (n != NULL) {
+	if (n != NULL && s->breakable != -1) {
 		if ( s->touch_callback != NULL && s->touch_callback(s, n) ) {
 			return 0;
 		}
@@ -133,7 +128,7 @@ touch_shapes_of_list (Shape *s, Shape **l)
 	int i;
 
 	for (i = 0; l[i] != NULL; i++) {
-		if ( touch_two_shapes(s, l[i]) && l[i]->breakable != -1 ) {
+		if ( touch_two_shapes(s, l[i]) && l[i]->breakable != -1 && s->breakable != -1 ) {
 			if ( s->touch_callback != NULL && s->touch_callback(s, l[i]) ) {
 				continue;
 			}
