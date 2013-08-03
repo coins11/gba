@@ -27,18 +27,18 @@ typedef struct velocity {
 
 extern inline void new_Velocity (Velocity *);
 
-extern inline void set_movable (Velocity *);
+static inline void set_movable (Velocity *);
 
-extern inline void set_velocity (Velocity *, int, int);
-extern inline void set_accelerate (Velocity *, int, int);
+static inline void set_velocity (Velocity *, int, int);
+static inline void set_accelerate (Velocity *, int, int);
 
-extern inline void up_velocity (Velocity *, int, int);
-extern inline void up_accelarate (Velocity *, int, int);
+static inline void up_velocity (Velocity *, int, int);
+static inline void up_accelarate (Velocity *, int, int);
 
-extern inline void down_velocity (Velocity *, int, int);
-extern inline void down_accelarate (Velocity *, int, int);
+static inline void down_velocity (Velocity *, int, int);
+static inline void down_accelarate (Velocity *, int, int);
 
-extern inline void velocity_reflect_x (Velocity *);
-extern inline void velocity_reflect_y (Velocity *);
+static inline void velocity_reflect_x (Velocity *);
+static inline void velocity_reflect_y (Velocity *);
 
 #endif

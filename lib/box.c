@@ -35,7 +35,7 @@ new_Box (Shape *s)
 	s->on_bottom_border = box_on_bottom_border;
 }
 
-inline void
+static inline void
 set_data_of_box (Shape *s, int x, int y, int w, int h) {
 	Box *b = &(s->as.box);
 
@@ -46,7 +46,7 @@ set_data_of_box (Shape *s, int x, int y, int w, int h) {
 	b->update_apex(s);
 }
 
-inline void
+static inline void
 update_apex_of_box (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -57,7 +57,7 @@ update_apex_of_box (Shape *s)
 	b->apex[3].set( &(b->apex[3]), s->p.x + b->width, s->p.y + b->height );
 }
 
-inline int
+static inline int
 resize_box (Shape *s, int dw, int dh) {
 	Box *b = &(s->as.box);
 
@@ -76,7 +76,7 @@ resize_box (Shape *s, int dw, int dh) {
 	}
 }
 
-inline void
+static inline void
 draw_box (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -88,7 +88,7 @@ draw_box (Shape *s)
 	}
 }
 
-inline int
+static inline int
 box_in_screen (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -96,7 +96,7 @@ box_in_screen (Shape *s)
 	return in_screen(s->p.x, s->p.y) && in_screen(s->p.x + b->width, s->p.y + b->height);
 }
 
-inline int
+static inline int
 box_on_area_border (Shape *s)
 {
 	Box *b = &(s->as.box);
@@ -106,7 +106,7 @@ box_on_area_border (Shape *s)
 		on_updown_area_border(s->p.y + b->height);
 }
 
-inline int
+static inline int
 box_on_bottom_border (Shape *s)
 {
 	Box *b = &(s->as.box);

@@ -31,7 +31,7 @@ new_Circle (Shape *s)
 	s->on_bottom_border = circle_on_bottom_border;
 }
 
-inline void
+static inline void
 set_data_of_circle (Shape *s, int x, int y, int r)
 {
 	Circle *c = &(s->as.circle);
@@ -40,7 +40,7 @@ set_data_of_circle (Shape *s, int x, int y, int r)
 	c->r = r;
 }
 
-inline int
+static inline int
 all_on_circle ( int (*f)(int, int), Shape *c, int x, int y )
 {
 	return (*f)(y + c->p.x, x + c->p.y) &&
@@ -53,7 +53,7 @@ all_on_circle ( int (*f)(int, int), Shape *c, int x, int y )
 		(*f)(y + c->p.x, -x + c->p.y); 
 }
 
-inline int
+static inline int
 some_on_circle ( int (*f)(int, int), Shape *c, int x, int y )
 {
 	return (*f)(y + c->p.x, x + c->p.y) ||
@@ -66,7 +66,7 @@ some_on_circle ( int (*f)(int, int), Shape *c, int x, int y )
 		(*f)(y + c->p.x, -x + c->p.y); 
 }
 
-inline void
+static inline void
 do_on_circle ( void (*f)(int, int, hword), Shape *c, int x, int y) 
 {
 	(*f)(y + c->p.x, x + c->p.y, c->color);
@@ -79,7 +79,7 @@ do_on_circle ( void (*f)(int, int, hword), Shape *c, int x, int y)
 	(*f)(y + c->p.x, -x + c->p.y, c->color); 
 }
 
-int
+static inline int
 circle_border ( Shape *s, int mode, void (*f)(void) )
 {
 	Circle *c = &(s->as.circle);
@@ -123,25 +123,25 @@ circle_border ( Shape *s, int mode, void (*f)(void) )
 	return flag;
 }
 
-inline int
+static inline int
 all_circle_border ( Shape *c, int (*f)(int, int) )
 {
 	return circle_border( c, 1, (void (*)(void))f );
 }
 
-inline int
+static inline int
 some_circle_border ( Shape *c, int (*f)(int, int) )
 {
 	return circle_border( c, 2, (void (*)(void))f );
 }
 
-inline void
+static inline void
 do_circle_border ( Shape *c, void (*f)(int, int, hword) )
 {
 	circle_border( c, 0, (void (*)(void))f );
 }
 
-inline void
+static inline void
 draw_circle (Shape *s){
 	void (*f)(int, int, hword);
 
@@ -150,7 +150,7 @@ draw_circle (Shape *s){
 	s->as.circle.do_border(s, f);
 }
 
-inline int
+static inline int
 circle_in_screen (Shape *s)
 {
 	Circle *c = &(s->as.circle);
@@ -159,7 +159,7 @@ circle_in_screen (Shape *s)
 		   in_screen(s->p.x - c->r, s->p.y - c->r);
 }
 
-inline int
+static inline int
 circle_on_area_border (Shape *s)
 {
 	Circle *c = &(s->as.circle);
@@ -168,7 +168,7 @@ circle_on_area_border (Shape *s)
 		   on_area_border(s->p.x - c->r, s->p.y - c->r);
 }
 
-inline int
+static inline int
 circle_on_bottom_border (Shape *s)
 {
 	Circle *c = &(s->as.circle);

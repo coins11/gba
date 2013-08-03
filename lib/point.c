@@ -13,13 +13,13 @@ new_Point (Point *p)
 	p->set = set_point;
 }
 
-inline int
+static inline int
 point_distance (Point *p1, Point *p2)
 {
 	return (p2->x - p1->x) * (p2->x - p1->x) + (p2->y - p1->y) * (p2->y - p1->y);
 }
 
-inline void
+static inline void
 point_draw_point (Point *p, hword c)
 {
 	draw_point(p->x, p->y, c);
@@ -34,7 +34,7 @@ draw_point (int x, int y, hword c)
 	*(base + x + LCD_WIDTH * y) = c;
 }
 
-inline void
+static inline void
 int_draw_line(int x1, int x2, int y, hword c)
 {
 	hword *base;
@@ -47,7 +47,7 @@ int_draw_line(int x1, int x2, int y, hword c)
 	}
 }
 
-inline int
+static inline int
 move_point (Point *p, int x, int y)
 {
 	if ( in_screen( p->x + x, p->y + y ) ) {
@@ -60,7 +60,7 @@ move_point (Point *p, int x, int y)
 	}
 }
 
-inline void
+static inline void
 set_point (Point *p, int x, int y)
 {
 	p->x = x;

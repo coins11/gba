@@ -3,6 +3,8 @@
 #include "velocity.h"
 #include "shape.h"
 #include "vector.h"
+#include "libgba/gba_systemcalls.h"
+#include "quadtree.h"
 #include "touch.h"
 	
 inline int

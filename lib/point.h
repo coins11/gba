@@ -14,12 +14,12 @@ typedef struct point {
 
 extern inline void new_Point(Point *);
 
-extern inline int point_distance(Point *, Point *);
-
-extern inline void point_draw_point (Point *, hword);
 extern inline void draw_point(int, int, hword);
-extern inline int  move_point(Point *, int, int);
 
-extern inline void set_point(Point *, int, int);
+static inline int point_distance(Point *, Point *);
+static inline void point_draw_point (Point *, hword);
+
+static inline int  move_point(Point *, int, int);
+static inline void set_point(Point *, int, int);
 
 #endif

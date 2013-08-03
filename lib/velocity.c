@@ -28,7 +28,7 @@ new_Velocity (Velocity *v)
 	v->reflect_y = velocity_reflect_y;
 }
 
-inline void
+static inline void
 set_movable (Velocity *v)
 {
 	if (v->dx || v->dy || v->ax || v->ay) {
@@ -38,7 +38,7 @@ set_movable (Velocity *v)
 	}
 }
 
-inline void
+static inline void
 set_velocity (Velocity *v, int x, int y)
 {
 	v->dx = x;
@@ -47,7 +47,7 @@ set_velocity (Velocity *v, int x, int y)
 	v->set_movable(v);
 }
 
-inline void
+static inline void
 set_accelerate (Velocity *v, int x, int y)
 {
 	v->ax = x;
@@ -56,31 +56,31 @@ set_accelerate (Velocity *v, int x, int y)
 	v->set_movable(v);
 }
 
-inline void
+static inline void
 up_velocity (Velocity *v, int x, int y)
 {
 	v->set_v(v, v->dx + x, v->dy + y);
 }
 
-inline void
+static inline void
 up_accelarate (Velocity *v, int x, int y)
 {
 	v->set_a(v, v->ax + x, v->ay + y);
 }
 
-inline void
+static inline void
 down_velocity (Velocity *v, int x, int y)
 {
 	v->up_v(v, x * (v->dx > 0 ? -1 : 1) * (v->dx ? 1 : 0), y * (v->dy > 0 ? -1 : 1) * (v->dy ? 1 : 0));
 }
 
-inline void
+static inline void
 down_accelarate (Velocity *v, int x, int y)
 {
 	v->up_a(v, x * (v->ax > 0 ? -1 : 1) * (v->ax ? 1 : 0), y * (v->ay > 0 ? -1 : 1) * (v->ay ? 1 : 0));
 }
 
-inline void
+static inline void
 velocity_reflect_x (Velocity *v)
 {
 	if (v->reflectable) {
@@ -88,7 +88,7 @@ velocity_reflect_x (Velocity *v)
 	}
 }
 
-inline void
+static inline void
 velocity_reflect_y (Velocity *v)
 {
 	if (v->reflectable) {

@@ -4,7 +4,7 @@ debug.o : lib/debug.c lib/debug.h
 	arm-none-eabi-gcc -fgnu89-inline -c $<
 
 %.o : lib/%.c lib/%.h
-	arm-none-eabi-gcc -fgnu89-inline -O3 -c $<
+	arm-none-eabi-gcc -std=c99 -fgnu89-inline -O3 -c $<
 
 crt.o : crt.S
 	arm-none-eabi-gcc -std=c99 -fgnu89-inline -O3 -c $<

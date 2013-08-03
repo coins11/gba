@@ -4,9 +4,10 @@
 #include "shape.h"
 #include "quadtree.h"
 #include "debug.h"
+#include "libgba/gba_systemcalls.h"
 #include "print.h"
 
-inline byte
+static inline byte
 separate_bit (byte n)
 {
 	n = ((n << 2) | n) & 0x33; // 0x33 = 00 11 00 11
@@ -15,7 +16,7 @@ separate_bit (byte n)
 	return n;
 }
 
-inline byte
+static inline byte
 morton_number (int x, int y)
 {
 	byte mx, my;
@@ -42,7 +43,7 @@ morton_number (int x, int y)
 	return separate_bit(mx) | (separate_bit(my) << 1);
 }
 
-inline int
+static inline int
 mn_index (int x1, int y1, int x2, int y2)
 {
 	byte ul = morton_number(x1, y1);
@@ -62,7 +63,7 @@ mn_index (int x1, int y1, int x2, int y2)
 	}
 }
 
-inline int
+static inline int
 box_mn (Shape *s)
 {
 	Box *b  = &(s->as.box);
@@ -70,7 +71,7 @@ box_mn (Shape *s)
 	return mn_index(b->apex[0].x, b->apex[0].y, b->apex[3].x, b->apex[3].y);
 }
 
-inline int
+static inline int
 circle_mn (Shape *s)
 {
 	Circle *c = &(s->as.circle);
