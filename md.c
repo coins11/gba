@@ -27,14 +27,16 @@ enum state {
 } STATE;
 
 static inline void
-die_on_bottom (Shape *s, int m) {
+die_on_bottom (Shape *s, int m)
+{
 	if ( s->on_bottom_border(s) ) {
 		STATE = DIE;
 	}
 }
 
 static inline int
-shrink_racket (Shape *r, Shape *s) {
+shrink_racket (Shape *r, Shape *s)
+{
 	if (s->id == BLOCK_ID) {
 		if ( !r->as.box.resize(r, -10, 0) ) {
 			STATE = DIE;
@@ -45,7 +47,8 @@ shrink_racket (Shape *r, Shape *s) {
 }
 
 static inline int
-accelerate_racket (Shape *ball, Shape *block) {
+accelerate_racket (Shape *ball, Shape *block)
+{
 	if (block->id == BLOCK_ID) {
 		ball->v.up_v( &(ball->v), 1, 1 );
 	}
@@ -54,12 +57,14 @@ accelerate_racket (Shape *ball, Shape *block) {
 }
 
 static inline int
-pierce_block (Shape *b1, Shape *b2) {
+pierce_block (Shape *b1, Shape *b2)
+{
 	return (b2->id == BLOCK_ID) || (b2->id == BALL_ID);
 }
 
 static inline void
-init_circles (Shape *c, int r, int x, int y, hword t) {
+init_circles (Shape *c, int r, int x, int y, hword t)
+{
 	new_Circle(c);
 	c->id    = BALL_ID;
 	c->color = COLOR_WHITE;
@@ -89,9 +94,9 @@ init_blocks (Shape *b, int l, int s, int x, int y, int w, int h)
 	}
 }
 
-
 static inline void
-move_racket (Shape *r, int key) {
+move_racket (Shape *r, int key)
+{
 	if (! (key & KEY_L)) {
 		r->v.up_v(&(r->v), -2, 0);
 	} else if (! (key & KEY_R)) {
@@ -108,7 +113,8 @@ move_racket (Shape *r, int key) {
 }
 
 static inline void
-move_block (Shape *b, int l, int key) {
+move_block (Shape *b, int l, int key)
+{
 	int i;
 	int s = !(key & KEY_SELECT);
 
@@ -119,7 +125,8 @@ move_block (Shape *b, int l, int key) {
 }
 
 static inline void
-init (Shape *c, Shape *b, Shape *r, hword begin) {
+init (Shape *c, Shape *b, Shape *r, hword begin)
+{
 	init_circles(c, 4, DivMod(begin, 220) + 10, 70, begin);
 	init_blocks(b, 10, 0, 25, 10, 5, 5);
 	init_blocks(b, 20, 10, 25, 30, 5, 5);
@@ -130,7 +137,8 @@ init (Shape *c, Shape *b, Shape *r, hword begin) {
 }
 
 int
-main () {
+main ()
+{
 	hword *fb = (hword*)VRAM;
 	hword begin;
 	Shape c;

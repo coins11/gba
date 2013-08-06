@@ -154,6 +154,12 @@ touch_shapes_of_list (Shape *s, Shape **l)
 	return 0;
 }
 
+static inline int
+check_same_space (Shape *s1, Shape *s2)
+{
+	return s1 != s2 && s1->same_space(s1, s2);
+}
+
 inline int
 move_touch_test_of_box (Shape *s, int x, int y)
 {
@@ -162,19 +168,14 @@ move_touch_test_of_box (Shape *s, int x, int y)
 	
 	s->mn = get_move_box_mn(s, x, y);
 
-	inline int f (Shape *s1, Shape *s2) {
-		return s1 != s2 && s1->same_space(s1, s2);
-	}
-
-	s->mn = old_mn;
-
-	if (run_two_side_list(s, f) == NULL) {
+	if (run_two_side_list(s, check_same_space) == NULL) {
+		s->mn = old_mn;
 		return 1;
 	} else {
+		s->mn = old_mn;
 		return 0;
 	}
 }
-
 
 inline int
 move_touch_test_of_circle (Shape *s, int x, int y)
@@ -184,15 +185,11 @@ move_touch_test_of_circle (Shape *s, int x, int y)
 
 	s->mn = get_move_circle_mn(s, x, y);;
 
-	int f (Shape *s1, Shape *s2) {
-		return s1 != s2 && s1->same_space(s1, s2);
-	}
-
-	s->mn = old_mn;
-
-	if (run_two_side_list(s, f) == NULL) {
+	if (run_two_side_list(s, check_same_space) == NULL) {
+		s->mn = old_mn;
 		return 1;
 	} else {
+		s->mn = old_mn;
 		return 0;
 	}
 }

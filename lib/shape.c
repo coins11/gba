@@ -2,7 +2,6 @@
 #include "libgba/gba_systemcalls.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "point.h"
 #include "vector.h"
 #include "velocity.h"
@@ -291,7 +290,7 @@ redraw_all_shapes (Shape *s)
 	run_two_side_list(s, f);
 }
 
-inline int
+static inline int
 abs (int n)
 {
 	return (n < 0 ? n * -1 : n);

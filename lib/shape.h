@@ -88,7 +88,8 @@ static inline void redraw_all_shapes (Shape *);
 
 extern inline Shape * run_two_side_list (Shape *, int (*)(Shape *, Shape *));
 
-static int shape_run (Shape *);
+static inline int abs (int);
+static inline int shape_run (Shape *);
 static inline void break_shape (Shape *);
 
 #endif
